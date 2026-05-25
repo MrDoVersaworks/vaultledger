@@ -38,6 +38,16 @@ test.describe('VaultLedger Feature Exhaustion & E2E Validation', () => {
     page.on('console', msg => console.log(`[BROWSER LOG] [${msg.type()}] ${msg.text()}`));
     page.on('pageerror', err => console.log(`[BROWSER ERROR] ${err.message}`));
 
+    // Sidebar navigation helper that handles mobile burger menus automatically
+    const navigateSidebar = async (navId: string) => {
+      const toggle = page.locator('#sidebar-toggle');
+      if (await toggle.isVisible()) {
+        await toggle.click();
+        await page.waitForTimeout(500); // Allow sidebar animation to complete
+      }
+      await page.click(navId);
+    };
+
     // Enable automated dialog acceptance for prompts & confirms
     page.on('dialog', async dialog => {
       if (dialog.type() === 'prompt') {
@@ -78,7 +88,7 @@ test.describe('VaultLedger Feature Exhaustion & E2E Validation', () => {
     // 2. SETTINGS CONFIGURATION (API KEY & THEME)
     // ---------------------------------------------------------
     await test.step('Configure Gemini AI Settings & Theme', async () => {
-      await page.click('#nav-settings');
+      await navigateSidebar('#nav-settings');
       await expect(page).toHaveURL(/\/settings/, { timeout: 15000 });
       
       // Test Light/Dark Mode Toggle
@@ -105,7 +115,7 @@ test.describe('VaultLedger Feature Exhaustion & E2E Validation', () => {
     // 3. CLIENT MANAGEMENT
     // ---------------------------------------------------------
     await test.step('Register a Corporate Client Entity', async () => {
-      await page.click('#nav-clients');
+      await navigateSidebar('#nav-clients');
       await expect(page).toHaveURL(/\/clients/, { timeout: 15000 });
       
       // Open modal
@@ -127,7 +137,7 @@ test.describe('VaultLedger Feature Exhaustion & E2E Validation', () => {
     // 4. INVOICE GENERATION
     // ---------------------------------------------------------
     await test.step('Draft an Encrypted Invoice', async () => {
-      await page.click('#nav-invoices');
+      await navigateSidebar('#nav-invoices');
       await expect(page).toHaveURL(/\/invoices/, { timeout: 15000 });
       
       // Navigate to draft interface (Open modal)
@@ -159,7 +169,7 @@ test.describe('VaultLedger Feature Exhaustion & E2E Validation', () => {
     // 5. EXPENSE RECORDING & FILTERING
     // ---------------------------------------------------------
     await test.step('Log Operating Costs & Test Filtering', async () => {
-      await page.click('#nav-expenses');
+      await navigateSidebar('#nav-expenses');
       await expect(page).toHaveURL(/\/expenses/, { timeout: 15000 });
       
       // Open Expense Modal
@@ -198,7 +208,7 @@ test.describe('VaultLedger Feature Exhaustion & E2E Validation', () => {
     // 6. DASHBOARD CHARTS VERIFICATION
     // ---------------------------------------------------------
     await test.step('Verify Analytics Rendering', async () => {
-      await page.click('#nav-dashboard');
+      await navigateSidebar('#nav-dashboard');
       await expect(page).toHaveURL(/\/dashboard/, { timeout: 15000 });
       
       // Verify the numbers we injected reflect on the dashboard widgets
@@ -208,10 +218,37 @@ test.describe('VaultLedger Feature Exhaustion & E2E Validation', () => {
     });
 
     // ---------------------------------------------------------
+    // 6b. INDIVIDUAL DELETE OPERATIONS (TEST INDIVIDUAL DELETIONS WITH ASSERTIONS)
+    // ---------------------------------------------------------
+    await test.step('Perform Individual Item Deletions with Assertions', async () => {
+      // 1. Delete Invoice
+      await navigateSidebar('#nav-invoices');
+      await expect(page).toHaveURL(/\/invoices/, { timeout: 15000 });
+      await page.locator('button[title="Delete Invoice"]').first().click();
+      await expect(page.locator('text=$2750.00')).not.toBeVisible({ timeout: 15000 });
+      await expect(page.locator('text=No Invoices Registered')).toBeVisible({ timeout: 15000 });
+      
+      // 2. Delete Expense
+      await navigateSidebar('#nav-expenses');
+      await expect(page).toHaveURL(/\/expenses/, { timeout: 15000 });
+      await page.locator('button[title="Delete expense entry"]').first().click();
+      await expect(page.locator('text=Server Hosting')).not.toBeVisible({ timeout: 15000 });
+      await expect(page.locator('text=No Expenses Recorded')).toBeVisible({ timeout: 15000 });
+
+      // 3. Delete Client
+      await navigateSidebar('#nav-clients');
+      await expect(page).toHaveURL(/\/clients/, { timeout: 15000 });
+      await page.locator('button[aria-label="Delete Client"]').first().click();
+      await expect(page.locator('text=Sovereign Test Client')).not.toBeVisible({ timeout: 15000 });
+      await expect(page.locator('text=No Clients Registered')).toBeVisible({ timeout: 15000 });
+      await page.waitForTimeout(2000);
+    });
+
+    // ---------------------------------------------------------
     // 7. DESTRUCTIVE ACTIONS & TEARDOWN (CLEANUP)
     // ---------------------------------------------------------
     await test.step('Teardown and Chamber Deletion', async () => {
-      await page.click('#nav-settings');
+      await navigateSidebar('#nav-settings');
       await page.waitForTimeout(1000);
       
       // 1. Clear API Credentials

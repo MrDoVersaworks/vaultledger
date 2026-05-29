@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTheme } from '@/contexts/ThemeContext';
 import { toast } from 'sonner';
 import ApiKeyBanner from './ApiKeyBanner';
+import ContactModal from '../shared/ContactModal';
 import { 
   LayoutDashboard, 
   Users, 
@@ -40,6 +41,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [contactOpen, setContactOpen] = useState(false);
 
   async function handleLogout() {
     try {
@@ -139,12 +141,12 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           <div className="px-2 py-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] text-center shadow-sm">
             <p className="text-[10px] font-bold tracking-wider uppercase text-emerald-500">Sovereign Support</p>
             <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Architected by Oyewole Favour</p>
-            <a 
-              href="mailto:mrdoofficial1@gmail.com" 
-              className="text-[10px] text-cyan-500 font-medium block hover:underline mt-1"
+            <button 
+              onClick={() => setContactOpen(true)}
+              className="text-[10px] text-cyan-500 font-medium block hover:underline mt-1 mx-auto"
             >
-              mrdoofficial1@gmail.com
-            </a>
+              Contact Support
+            </button>
           </div>
 
           {/* Settings Buttons */}
@@ -189,6 +191,8 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
           {children}
         </div>
       </main>
+
+      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
     </div>
   );
 }

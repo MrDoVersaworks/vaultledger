@@ -156,6 +156,7 @@ export default function RootPage() {
             padding: '0.5rem 1rem',
             borderRadius: '0.5rem',
             transition: 'all 0.2s',
+            whiteSpace: 'nowrap',
           }} className="hover-nav">
             Sign In
           </Link>
@@ -169,6 +170,7 @@ export default function RootPage() {
             borderRadius: '0.5rem',
             boxShadow: '0 4px 14px rgba(16, 185, 129, 0.2)',
             transition: 'all 0.2s',
+            whiteSpace: 'nowrap',
           }} className="hover-btn">
             Get Started
           </Link>

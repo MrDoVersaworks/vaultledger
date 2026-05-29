@@ -20,7 +20,6 @@ export default function SettingsPage() {
   const [apiKey, setApiKey] = useState('');
   const [model, setModel] = useState('gemini-1.5-flash');
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
-  const [showKey, setShowKey] = useState(false);
   
   const [isSaving, setIsSaving] = useState(false);
   const [isClearingKey, setIsClearingKey] = useState(false);
@@ -166,19 +165,12 @@ export default function SettingsPage() {
             <div className="relative">
               <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-secondary)]" />
               <input
-                type={showKey ? 'text' : 'password'}
+                type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder={hasApiKey ? '••••••••••••••••••••••••••••••••' : 'Input your Google Gemini API Key'}
                 className="w-full bg-[var(--bg-input)] border border-[var(--border-default)] rounded-xl px-10 py-3 text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all shadow-sm"
               />
-              <button
-                type="button"
-                onClick={() => setShowKey(!showKey)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-emerald-500 transition-colors"
-              >
-                {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
             </div>
             <p className="text-[10px] text-[var(--text-secondary)] mt-2 leading-relaxed">
               Your API Key is encrypted symmetrically using <span className="text-emerald-500 font-semibold">AES-256-GCM</span> on the backend before being written to Postgres. It is decrypted on-the-fly and never exposed in any API output.

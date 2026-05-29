@@ -99,6 +99,10 @@ VaultLedger enforces strict cryptographic boundaries to maintain total integrity
 **Challenge:** Dynamic Next.js client interfaces suffer from page loading and TTFB delays when serving static assets (CSS, icons, font assets) directly from serverless execution instances.
 **Solution:** Leveraged Vercel's global edge network (Edge CDN) by implementing strict cache-control header policies for all static assets and pre-rendering static routes. This guarantees sub-10ms delivery of resources and eliminates cold-start overhead for static asset requests.
 
+### 5. Zero-Leak Contact Forms & Attachment Warning Modal
+**Challenge:** Direct contact email addresses are prone to harvesting spam bots, and incoming invoices/receipt attachments present major file execution hazards (such as active macros or infected PDFs) if run locally.
+**Solution:** Replaced all raw email links with a client-side Contact Form utilizing React state-managed inputs. All invoice attachments and exports are intercepted by a secure warning gate modal that blocks download execution and instructs the user to run downloads strictly inside an isolated **Virtual Machine (VM)**, protecting their main workstation.
+
 ---
 
 ## 🏗️ Strategic Deployment (Vercel Monorepo)
@@ -148,6 +152,6 @@ VaultLedger operates as a highly available **Unified Vercel Monorepo**:
 VaultLedger is a signature release in the portfolio sequence.
 
 **Architected by Oyewole Favour**  
-📧 [mrdoofficial1@gmail.com](mailto:mrdoofficial1@gmail.com)  
+📧 Contact via the in-app **Contact Form** (accessible from the dashboard sidebar)  
 💼 [LinkedIn](https://www.linkedin.com/in/mrdoversaworks/)  
 🌐 [GitHub](https://github.com/MrDoVersaworks/)

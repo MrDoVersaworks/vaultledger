@@ -5,11 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { PlatformReviews, Review } from '@/components/PlatformReviews';
+import { UnifiedFooter } from '@/components/UnifiedFooter';
 
 export default function RootPage() {
   const { isAuthenticated, isLoading, login, register } = useAuth();
   const router = useRouter();
   const [isDemoLoading, setIsDemoLoading] = useState(false);
+
+  const mockReviews: Review[] = [
+    { id: '1', name: 'Sophia Sterling', rating: 5, profession: 'Finance Director', feedback: 'VaultLedger provides the sovereign security our financial data demands. The AI invoice scanning is incredibly accurate.' },
+    { id: '2', name: 'Michael Chang', rating: 5, profession: 'CFO', feedback: 'The local AES encryption gives me peace of mind. We use VaultLedger to classify all cash outflows effortlessly.' },
+    { id: '3', name: 'Rachel Greene', rating: 5, profession: 'Independent Contractor', feedback: 'No more generic SaaS platforms holding my invoices hostage. VaultLedger is pure, unadulterated financial sovereignty.' }
+  ];
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -317,24 +325,15 @@ export default function RootPage() {
 
       </main>
 
-      {/* Recruiter Footer attribution for portfolio integrity */}
-      <footer style={{
-        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-        backgroundColor: 'rgba(8, 10, 16, 0.5)',
-        padding: '3rem 2rem',
-        textAlign: 'center',
-        color: '#64748b',
-        fontSize: '0.875rem',
-        position: 'relative',
-        zIndex: 10,
-      }}>
-        <p style={{ margin: '0 0 0.5rem 0' }}>
-          VaultLedger Ledger Console — Engineered with Next.js & Express.
-        </p>
-        <p style={{ margin: 0, fontWeight: 600, color: '#f8fafc' }}>
-          Architected by <span style={{ color: '#10b981' }}>Oyewole Favour</span>
-        </p>
-      </footer>
+      <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'rgba(8, 10, 16, 0.4)' }}>
+        <PlatformReviews reviews={mockReviews} />
+      </div>
+
+      <UnifiedFooter 
+        platformName="VaultLedger Ledger Console" 
+        techStack="Next.js & Express"
+        contactLink="https://devpulse.tech"
+      />
 
       {styleDefinitions}
     </div>

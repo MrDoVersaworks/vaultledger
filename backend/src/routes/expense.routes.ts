@@ -11,6 +11,7 @@ import {
   updateExpense,
   deleteExpense
 } from '../services/expense.service.js';
+import { invalidateCache } from '../utils/cache.js';
 
 const router = Router();
 
@@ -58,6 +59,8 @@ router.post(
     const userId = req.userId!;
     const expense = await createExpense(userId, req.body);
 
+    invalidateCache('/api/dashboard', userId);
+
     res.status(201).json({
       success: true,
       data: expense,
@@ -72,6 +75,8 @@ router.post(
   asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.userId!;
     const expense = await createExpenseAI(userId, req.body);
+
+    invalidateCache('/api/dashboard', userId);
 
     res.status(201).json({
       success: true,
@@ -90,6 +95,9 @@ router.put(
 
     try {
       const expense = await updateExpense(userId, expenseId, req.body);
+
+      invalidateCache('/api/dashboard', userId);
+
       res.status(200).json({
         success: true,
         data: expense,
@@ -114,6 +122,9 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
 
   try {
     await deleteExpense(userId, expenseId);
+
+    invalidateCache('/api/dashboard', userId);
+
     res.status(200).json({
       success: true,
       data: null,

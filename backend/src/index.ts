@@ -13,11 +13,18 @@ import invoiceRoutes from './routes/invoice.routes.js';
 import expenseRoutes from './routes/expense.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
+import publicRoutes from './routes/public.routes.js';
+import adminRoutes from './routes/admin.routes.js';
+import contactRoutes from './routes/contact.routes.js';
 
 const app = express();
 
 // Security Middlewares
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // Let the Next.js frontend handle CSP for rendering
+  frameguard: { action: 'deny' }, // Prevent clickjacking
+  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true }, // Strict Transport Security
+}));
 app.use(
   cors({
     origin: config.CORS_ORIGIN.includes(',')
@@ -46,6 +53,9 @@ app.use('/api/invoices', invoiceRoutes);
 app.use('/api/expenses', expenseRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/public', publicRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/contact', contactRoutes);
 
 // 404 Handler
 app.use((_req, res) => {

@@ -62,6 +62,22 @@ test.describe('VaultLedger Feature Exhaustion & E2E Validation', () => {
     // ---------------------------------------------------------
     await test.step('Navigate to Landing and Register', async () => {
       await page.goto('/');
+      
+      // Contact Demo
+      const contactBtn = page.locator('button:has-text("Contact"), a:has-text("Contact")').first();
+      if (await contactBtn.isVisible()) {
+          await contactBtn.click();
+          await page.waitForTimeout(1000);
+          await page.locator('input[type="text"]').first().fill(`Observer`);
+          await page.locator('input[type="email"]').first().fill(demoEmail);
+          await page.locator('textarea').first().fill('Interested in Sovereign architecture. Please reach out.');
+          const keyInput = page.locator('input[type="password"]').first();
+          if (await keyInput.isVisible()) await keyInput.fill(SYSTEM_API_KEY);
+          await page.waitForTimeout(1000);
+          await page.locator('form').getByRole('button', { name: /Send/i }).click();
+          await page.waitForTimeout(3000);
+      }
+
       // Verify landing page CTA
       await expect(page.getByRole('link', { name: /Launch Ledger Console/i })).toBeVisible();
       
@@ -242,6 +258,21 @@ test.describe('VaultLedger Feature Exhaustion & E2E Validation', () => {
       await expect(page.locator('text=Sovereign Test Client')).not.toBeVisible({ timeout: 15000 });
       await expect(page.locator('text=No Clients Registered')).toBeVisible({ timeout: 15000 });
       await page.waitForTimeout(2000);
+
+      // 4. Admin Inbox Check
+      await page.goto('/admin/inbox');
+      await page.waitForTimeout(3000);
+      const markReadBtn = page.locator('button[title="Mark as read"], button:has-text("Mark Read")').first();
+      if (await markReadBtn.isVisible()) {
+          await markReadBtn.click();
+          await page.waitForTimeout(2000);
+      }
+      const purgeMsgBtn = page.locator('button[title="Purge Message"], button:has-text("Purge")').first();
+      if (await purgeMsgBtn.isVisible()) {
+          page.once('dialog', async dialog => dialog.accept());
+          await purgeMsgBtn.click();
+          await page.waitForTimeout(2000);
+      }
     });
 
     // ---------------------------------------------------------

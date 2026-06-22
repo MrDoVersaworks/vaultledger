@@ -11,6 +11,7 @@ import {
   updateInvoiceStatus,
   deleteInvoice
 } from '../services/invoice.service.js';
+import { invalidateCache } from '../utils/cache.js';
 
 const router = Router();
 
@@ -58,6 +59,9 @@ router.post(
     const userId = req.userId!;
     try {
       const invoice = await createInvoice(userId, req.body);
+      
+      invalidateCache('/api/dashboard', userId);
+
       res.status(201).json({
         success: true,
         data: invoice,
@@ -124,6 +128,9 @@ router.patch(
 
     try {
       const invoice = await updateInvoiceStatus(userId, invoiceId, status);
+      
+      invalidateCache('/api/dashboard', userId);
+
       res.status(200).json({
         success: true,
         data: invoice,
@@ -148,6 +155,9 @@ router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<
 
   try {
     await deleteInvoice(userId, invoiceId);
+    
+    invalidateCache('/api/dashboard', userId);
+
     res.status(200).json({
       success: true,
       data: null,

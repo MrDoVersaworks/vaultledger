@@ -32,11 +32,13 @@ graph TD
 
 ---
 
-### 2. Zero-Friction Registration
-- **Objective:** Create a distinct user space and initialize their private data vault.
-- **Robot Action:** Fills out the registration form using explicit selector IDs:
-  - **Full Name:** `Sovereign Test User`
-  - **Email:** `test_architect_[TIMESTAMP]@sovereign.test`
+### 1. Registration & Landing
+* **Objective:** Verify initial CTA visibility and tenant identity creation.
+* **Payload:** Standard deterministic test email `test_architect_{timestamp}@sovereign.test`.
+
+### 1b. Contact & Inbox Form Demo
+* **Objective:** Verify the public contact gateway and AI screening.
+* **Payload:** Submits a test inquiry with the Sovereign API key for BYOK-enabled AI screening.
   - **Company:** `Sovereign Test Company`
   - **Secret Password:** `Password123!`
 - **Visual Checks:** Verifies inputs are correctly focused, submits the form, and waits up to 30 seconds to allow for serverless database cold starts.

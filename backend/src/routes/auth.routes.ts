@@ -6,6 +6,7 @@ import { registerSchema, loginSchema, deleteAccountSchema } from '../types/index
 import { config } from '../config/index.js';
 import { REFRESH_COOKIE_NAME, REFRESH_TOKEN_EXPIRY_DAYS } from '../constants/index.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { jwtBlocklist } from '../utils/blocklist.js';
 import {
   registerUser,
   loginUser,
@@ -121,6 +122,17 @@ router.post('/logout', authMiddleware, asyncHandler(async (req: Request, res: Re
     await logoutUser(refreshToken);
   }
 
+  const authHeader = req.headers.authorization;
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
+    if (token) {
+      const signature = token.split('.')[2];
+      if (signature) {
+        jwtBlocklist.add(signature);
+      }
+    }
+  }
+
   res.clearCookie(REFRESH_COOKIE_NAME, { path: '/' });
 
   res.status(200).json({
@@ -146,6 +158,19 @@ router.delete(
       }
 
       const { password } = req.body;
+
+      // Blocklist the current access token immediately
+      const authHeader = req.headers.authorization;
+      if (authHeader) {
+        const token = authHeader.split(' ')[1];
+        if (token) {
+          const signature = token.split('.')[2];
+          if (signature) {
+            jwtBlocklist.add(signature);
+          }
+        }
+      }
+
       await deleteUserAccount(userId, password);
 
       res.clearCookie(REFRESH_COOKIE_NAME, { path: '/' });

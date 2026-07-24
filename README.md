@@ -36,6 +36,18 @@ VaultLedger is custom-engineered for:
 
 ---
 
+## 📸 Interface & User Experience
+
+| Landing Page | Authentication Portal |
+|:---:|:---:|
+| ![Landing Page](./frontend/public/screenshots/landing.png) | ![Login Screen](./frontend/public/screenshots/login.png) |
+
+| Account Registration |
+|:---:|
+| ![Register Screen](./frontend/public/screenshots/register.png) |
+
+---
+
 ## 🧪 Evaluation: The Full Lifecycle Demo
 
 VaultLedger features a rigorous, high-transparency **Playwright E2E Showcase** that simulates a full contractor journey. It doesn't just test units; it proves frontend-to-database integrity under real-world visual load.

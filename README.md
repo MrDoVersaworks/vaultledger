@@ -31,7 +31,7 @@ VaultLedger is custom-engineered for:
 
 - **Sovereign Client Vault:** A highly organized client entity registry ensuring invoices are mapped with strict foreign-key integrity.
 - **Dynamic Invoice Engine:** Live reactive client-side subtotal, taxation, and final total recalculations, backing immutable draft and paid invoice registers.
-- **AI-Augmented Expense Inception:** Powered by Google Gemini (`gemini-2.5-flash`), the system automatically reviews transactions (e.g., "AWS Cloud Hosting") and maps them to standard tax categories ("Software & Subscriptions") via structured JSON outputs.
+- **AI-Augmented Expense Inception:** Powered by user-configurable Google Gemini models, the system automatically reviews transactions (e.g., "AWS Cloud Hosting") and maps them to standard tax categories ("Software & Subscriptions") via structured JSON outputs.
 - **Interactive Financial Cockpit:** An administrative hub showing real-time gross earnings, active operating costs, and tax liabilities with modern, beautifully responsive charts.
 
 ---

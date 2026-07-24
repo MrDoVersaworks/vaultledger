@@ -68,7 +68,6 @@ VaultLedger features a rigorous, high-transparency **Playwright E2E Showcase** t
 cd frontend
 npx playwright test tests/e2e/recording.spec.ts --project=chromium --workers=1 --headed
 ```
-📖 **[E2E Recording Walkthrough](./frontend/tests/e2e/recording_walkthrough.md):** Read the comprehensive, line-by-line engineering breakdown of the automated showcase.
 
 ---
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { toast } from 'sonner';
-
+import { PlatformReviews } from '@/components/PlatformReviews';
 import { UnifiedFooter } from '@/components/UnifiedFooter';
 
 export default function RootPage() {
@@ -320,7 +320,9 @@ export default function RootPage() {
 
       </main>
 
-
+      <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'rgba(8, 10, 16, 0.4)' }}>
+        <PlatformReviews />
+      </div>
 
       <UnifiedFooter 
         platformName="VaultLedger Ledger Console" 

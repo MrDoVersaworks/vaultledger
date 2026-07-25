@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { Lock, Mail, KeyRound, User, Briefcase, ArrowRight } from 'lucide-react';
+import { Lock, Mail, KeyRound, User, Briefcase, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [businessName, setBusinessName] = useState('');
+  const [termsAgreed, setTermsAgreed] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, isAuthenticated } = useAuth();
@@ -27,6 +28,13 @@ export default function RegisterPage() {
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError('');
+
+    if (!termsAgreed) {
+      setError('You must agree to the Terms of Service and Privacy Policy to proceed.');
+      toast.error('Terms & Privacy agreement required.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -143,11 +151,61 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            {/* Terms & Conditions Agreement Section */}
+            <div className="p-4 bg-slate-900/80 border border-slate-800 rounded-2xl space-y-3">
+              <div className="flex items-start gap-3">
+                <input
+                  id="terms-checkbox-vl"
+                  type="checkbox"
+                  checked={termsAgreed}
+                  onChange={(e) => setTermsAgreed(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-950 cursor-pointer"
+                />
+                <label htmlFor="terms-checkbox-vl" className="text-xs text-slate-400 leading-relaxed cursor-pointer select-none">
+                  I have read and agree to the{' '}
+                  <Link href="/terms" target="_blank" className="text-emerald-400 underline hover:text-emerald-300 font-medium">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" target="_blank" className="text-emerald-400 underline hover:text-emerald-300 font-medium">
+                    Privacy Policy
+                  </Link>.
+                </label>
+              </div>
+
+              <div className="flex gap-2 pt-1 border-t border-slate-800 text-[11px]">
+                <button
+                  type="button"
+                  onClick={() => setTermsAgreed(true)}
+                  className={`flex-1 py-1.5 px-2 rounded-lg font-semibold transition-all ${
+                    termsAgreed
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                  }`}
+                >
+                  {termsAgreed ? '✓ Terms Agreed' : 'I Agree'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTermsAgreed(false)}
+                  className={`flex-1 py-1.5 px-2 rounded-lg font-semibold transition-all ${
+                    !termsAgreed
+                      ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                  }`}
+                >
+                  Decline
+                </button>
+              </div>
+            </div>
+
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !termsAgreed}
               id="register-submit"
-              className="w-full py-3 px-4 inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-500 hover:to-cyan-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 disabled:pointer-events-none transition-all duration-200 shadow-lg shadow-emerald-500/10 hover:scale-[1.01]"
+              className={`w-full py-3 px-4 inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-500 hover:to-cyan-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 shadow-lg shadow-emerald-500/10 ${
+                !termsAgreed ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01]'
+              }`}
             >
               {isSubmitting ? 'Creating vault chamber...' : 'Create Vault'}
               <ArrowRight className="w-4 h-4" />

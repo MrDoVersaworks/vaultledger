@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { PlatformReviews, Review } from '@/components/PlatformReviews';
+
 import { UnifiedFooter } from '@/components/UnifiedFooter';
 
 export default function RootPage() {
@@ -13,11 +13,6 @@ export default function RootPage() {
   const router = useRouter();
   const [isDemoLoading, setIsDemoLoading] = useState(false);
 
-  const mockReviews: Review[] = [
-    { id: '1', name: 'Sophia Sterling', rating: 5, profession: 'Finance Director', feedback: 'VaultLedger provides the sovereign security our financial data demands. The AI invoice scanning is incredibly accurate.' },
-    { id: '2', name: 'Michael Chang', rating: 5, profession: 'CFO', feedback: 'The local AES encryption gives me peace of mind. We use VaultLedger to classify all cash outflows effortlessly.' },
-    { id: '3', name: 'Rachel Greene', rating: 5, profession: 'Independent Contractor', feedback: 'No more generic SaaS platforms holding my invoices hostage. VaultLedger is pure, unadulterated financial sovereignty.' }
-  ];
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -325,9 +320,7 @@ export default function RootPage() {
 
       </main>
 
-      <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'rgba(8, 10, 16, 0.4)' }}>
-        <PlatformReviews />
-      </div>
+
 
       <UnifiedFooter 
         platformName="VaultLedger Ledger Console" 

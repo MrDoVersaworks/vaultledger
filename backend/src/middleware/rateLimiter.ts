@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import { config } from '../config/index.js';
 import {
   AUTH_RATE_LIMIT_WINDOW_MS,

@@ -332,7 +332,7 @@ export default function RootPage() {
       <UnifiedFooter 
         platformName="VaultLedger Ledger Console" 
         techStack="Next.js & Express"
-        contactLink="https://devpulse.tech"
+        contactLink="https://devpulse-igt5.vercel.app"
       />
 
       {styleDefinitions}

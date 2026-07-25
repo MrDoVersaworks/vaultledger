@@ -326,13 +326,13 @@ export default function RootPage() {
       </main>
 
       <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'rgba(8, 10, 16, 0.4)' }}>
-        <PlatformReviews reviews={mockReviews} />
+        <PlatformReviews />
       </div>
 
       <UnifiedFooter 
         platformName="VaultLedger Ledger Console" 
         techStack="Next.js & Express"
-        contactLink="https://devpulse-igt5.vercel.app"
+        contactLink="https://devpulse-zeta-six.vercel.app/"
       />
 
       {styleDefinitions}

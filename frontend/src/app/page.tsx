@@ -20,8 +20,15 @@ export default function RootPage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  const handleDemoSandbox = async (e: React.MouseEvent) => {
+  const [showPolicyModal, setShowPolicyModal] = useState(false);
+
+  const openDemoSandboxModal = (e: React.MouseEvent) => {
     e.preventDefault();
+    setShowPolicyModal(true);
+  };
+
+  const confirmDemoSandbox = async () => {
+    setShowPolicyModal(false);
     if (isDemoLoading) return;
     setIsDemoLoading(true);
 
@@ -246,7 +253,7 @@ export default function RootPage() {
             </Link>
 
             <button
-              onClick={handleDemoSandbox}
+              onClick={openDemoSandboxModal}
               disabled={isDemoLoading}
               style={{
                 backgroundColor: 'rgba(255, 255, 255, 0.03)',
@@ -323,6 +330,72 @@ export default function RootPage() {
       <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'rgba(8, 10, 16, 0.4)' }}>
         <PlatformReviews />
       </div>
+
+      {/* ── Policy Acceptance Modal for Demo Sandbox ── */}
+      {showPolicyModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 100,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem',
+          backgroundColor: 'rgba(8, 10, 16, 0.85)',
+          backdropFilter: 'blur(12px)',
+        }}>
+          <div style={{
+            width: '100%',
+            maxWidth: '500px',
+            backgroundColor: 'rgba(15, 23, 42, 0.95)',
+            border: '1px solid rgba(16, 185, 129, 0.2)',
+            borderRadius: '1.25rem',
+            padding: '1.75rem',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
+            color: '#fff',
+          }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.75rem', color: '#fff' }}>
+              Terms of Service &amp; Usage Policy
+            </h3>
+            <p style={{ fontSize: '0.875rem', color: '#94a3b8', lineHeight: 1.6, marginBottom: '1.25rem' }}>
+              To access the VaultLedger Interactive Sandbox Cockpit, please confirm that you agree to our Financial Platform Terms of Service, Privacy Policy, and Sovereign Security Guidelines.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <button
+                onClick={() => setShowPolicyModal(false)}
+                style={{
+                  padding: '0.6rem 1.2rem',
+                  borderRadius: '0.75rem',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#cbd5e1',
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                }}
+              >
+                Decline
+              </button>
+              <button
+                onClick={confirmDemoSandbox}
+                style={{
+                  padding: '0.6rem 1.5rem',
+                  borderRadius: '0.75rem',
+                  background: 'linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)',
+                  border: 'none',
+                  color: '#080a10',
+                  fontWeight: 700,
+                  fontSize: '0.875rem',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                }}
+              >
+                Accept &amp; Launch Sandbox
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <UnifiedFooter 
         platformName="VaultLedger Ledger Console" 

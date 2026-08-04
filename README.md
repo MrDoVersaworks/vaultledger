@@ -4,7 +4,7 @@
 [![Playwright E2E](https://img.shields.io/badge/QA-Playwright-green)](https://playwright.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**VaultLedger** is a production-grade, highly secure financial orchestration terminal designed for **Absolute Data Sovereignty**. It combines strict, zero-trust cryptographic ledger control with private, user-provisioned AI expense categorization (BYOK) to create a premium accounting ecosystem for independent contractors, high-velocity builders, and privacy-conscious founders.
+**VaultLedger** is a secure financial orchestration terminal currently **under active development**, designed for **Absolute Data Sovereignty**. It combines strict, zero-trust cryptographic ledger control with private, user-provisioned AI expense categorization (BYOK) to create a premium accounting ecosystem for independent contractors, high-velocity builders, and privacy-conscious founders.
 
 ---
 
@@ -126,7 +126,7 @@ VaultLedger operates as a highly available **Unified Vercel Monorepo**:
 - **Backend API:** Set up in the `backend` root. Deployed as Node.js Serverless Functions for sub-millisecond cold boots.
 
 ### 2. Database Layer
-- **Neon Serverless PostgreSQL:** Scales storage and computation to 0 when idle, reducing operational costs while preserving production-grade speed.
+- **Neon Serverless PostgreSQL:** Scales storage and computation to 0 when idle, reducing operational costs while preserving high-performance speed.
 
 ---
 

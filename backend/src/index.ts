@@ -16,6 +16,7 @@ import settingsRoutes from './routes/settings.routes.js';
 import publicRoutes from './routes/public.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import contactRoutes from './routes/contact.routes.js';
+import { apiRateLimiter } from './middleware/rateLimiter.js';
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.get('/health', (_req, res) => {
 });
 
 // API Routes
+app.use('/api', apiRateLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/clients', clientRoutes);
 app.use('/api/invoices', invoiceRoutes);

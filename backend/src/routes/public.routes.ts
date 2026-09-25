@@ -26,7 +26,15 @@ router.get('/reviews', async (_req: Request, res: Response): Promise<void> => {
     .from(platformReviews)
     .where(eq(platformReviews.status, 'approved'))
     .orderBy(desc(platformReviews.created_at));
-  res.status(200).json({ success: true, data: reviews });
+  const data = reviews.map((review) => ({
+    id: review.id,
+    name: review.name,
+    profession: review.profession,
+    rating: review.rating,
+    feedback: review.feedback,
+    createdAt: review.created_at,
+  }));
+  res.status(200).json({ success: true, data });
 });
 
 router.post('/reviews', async (req: Request, res: Response): Promise<void> => {

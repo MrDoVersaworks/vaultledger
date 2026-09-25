@@ -124,7 +124,19 @@ router.put('/settings', async (req: Request, res: Response, next: NextFunction):
         .returning();
     }
 
-    res.status(200).json({ success: true, data: updated });
+    res.status(200).json({
+      success: true,
+      data: {
+        id: updated.id,
+        name: updated.name,
+        profession: updated.profession,
+        rating: updated.rating,
+        feedback: updated.feedback,
+        status: updated.status,
+        createdAt: updated.created_at,
+        updatedAt: updated.updated_at,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -136,7 +148,17 @@ router.put('/settings', async (req: Request, res: Response, next: NextFunction):
 router.get('/reviews', async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const reviews = await db.select().from(platformReviews).orderBy(desc(platformReviews.created_at));
-    res.status(200).json({ success: true, data: reviews });
+    const data = reviews.map((review) => ({
+      id: review.id,
+      name: review.name,
+      profession: review.profession,
+      rating: review.rating,
+      feedback: review.feedback,
+      status: review.status,
+      createdAt: review.created_at,
+      updatedAt: review.updated_at,
+    }));
+    res.status(200).json({ success: true, data });
   } catch (error) {
     next(error);
   }

@@ -20,10 +20,17 @@ router.get('/inbox', async (_req: Request, res: Response, next: NextFunction): P
       .from(contactMessages)
       .orderBy(desc(contactMessages.created_at));
 
-    res.status(200).json({
-      success: true,
-      data: messages,
-    });
+    const data = messages.map((message) => ({
+      id: message.id,
+      senderName: message.sender_name,
+      senderEmail: message.sender_email,
+      message: message.message,
+      isRead: message.is_read,
+      aiScreeningPassed: message.ai_screening_passed,
+      createdAt: message.created_at,
+    }));
+
+    res.status(200).json({ success: true, data });
   } catch (error) {
     next(error);
   }
@@ -47,7 +54,7 @@ router.patch('/inbox/:id/read', async (req: Request, res: Response, next: NextFu
 
     res.status(200).json({
       success: true,
-      data: updated,
+      data: {\n        id: updated.id,\n        senderName: updated.sender_name,\n        senderEmail: updated.sender_email,\n        message: updated.message,\n        isRead: updated.is_read,\n        aiScreeningPassed: updated.ai_screening_passed,\n        createdAt: updated.created_at,\n      },
     });
   } catch (error) {
     next(error);

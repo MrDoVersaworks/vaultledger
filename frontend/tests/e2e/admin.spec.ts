@@ -61,3 +61,32 @@ test.describe('VaultLedger — Admin & Management Controls', () => {
     expect(res.status()).toBe(401);
   });
 });
+
+
+test('admin can approve a pending public review', async ({ request }) => {
+  const email = process.env.E2E_ADMIN_EMAIL;
+  const password = process.env.E2E_ADMIN_PASSWORD;
+  test.skip(!email || !password, 'E2E administrator credentials are not configured');
+
+  const review = await request.post(`${BACKEND_URL}/api/public/reviews`, {
+    data: { name: 'E2E Reviewer', profession: 'Tester', rating: 5, feedback: 'E2E moderation workflow verification.' },
+  });
+  expect(review.status()).toBe(201);
+
+  const login = await request.post(`${BACKEND_URL}/api/auth/login`, {
+    data: { email, password },
+  });
+  expect(login.status()).toBe(200);
+  const loginBody = await login.json();
+
+  const reviewBody = await review.json();
+  const approval = await request.patch(`${BACKEND_URL}/api/admin/reviews/${reviewBody.data.id}/approve`, {
+    headers: { Authorization: `Bearer ${loginBody.data.accessToken}` },
+  });
+  expect(approval.status()).toBe(200);
+
+  const publicReviews = await request.get(`${BACKEND_URL}/api/public/reviews`);
+  expect(publicReviews.status()).toBe(200);
+  const body = await publicReviews.json();
+  expect(body.data.some((item: { id: string }) => item.id === reviewBody.data.id)).toBe(true);
+});

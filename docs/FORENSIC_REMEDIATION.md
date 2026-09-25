@@ -182,3 +182,14 @@ On 2026-09-25, the connected Vercel backend production deployment `dpl_4j855rsQP
 This is direct production evidence for the migration/schema finding: the untouched main deployment is running code whose current schema expects `system_settings`, while the historical migration set did not create that table. The remediation adds `0007_current_schema_retrofit.sql`; it has **not** been applied to production because main and production must remain untouched during forensic remediation.
 
 Vercel runtime error inspection for both VaultLedger projects showed no other runtime errors in the preceding 24 hours at the time of inspection. The specific `/api/public/settings` 500 is nevertheless a verified active production defect on main.
+
+
+## Latest verification pass — 2026-09-25
+
+- The connected Vercel account was inspected directly. The VaultLedger frontend project is connected to GitHub and has a deployment for `audit-remediation`; this confirms the remediation branch is automatically considered by Vercel, but it is **not** production. Production remains the `main` deployment.
+- The latest known remediation frontend deployment (`dpl_7kZShFgfaVf8KQ7JPV1KZrff79bp`, commit `d2d69a9...`) reached the Next.js compile stage successfully but failed during TypeScript checking because the frontend target does not permit BigInt literal syntax. This was a real verification failure, not a Vercel quota failure. The offending dashboard/invoice presentation code has since been corrected to use target-compatible integer-cent arithmetic.
+- The Vercel Git status on the current remediation commits also reports the account build-rate-limit target. Therefore a fresh post-fix deployment has not yet provided a green runtime/build oracle.
+- A local container clone/test attempt was blocked by the execution environment's inability to resolve `github.com`; no local test result is being represented as a pass.
+- GitHub Actions workflow inspection confirms `.github/workflows/main.yml` contains backend type/unit/build gates, frontend type/build gates, PostgreSQL migration execution, E2E seeding, and Playwright execution. The connected GitHub tool currently reports no workflow run for the remediation commit, so those tests remain unexecuted evidence rather than assumed green.
+- E2E files were updated for the current contracts and re-checked for duplicate UI test declarations. The suite covers credential-free landing behavior, legal pages, review moderation, trusted-origin refresh/logout, durable refresh-token reuse rejection, access-token revocation, malformed UUID rejection, and admin endpoint protection.
+- Main remains untouched.

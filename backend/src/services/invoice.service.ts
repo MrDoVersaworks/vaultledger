@@ -163,20 +163,20 @@ export async function createInvoice(userId: string, input: CreateInvoiceInput): 
   // Calculate totals
   let subtotalCents = 0n;
   const calculatedItems = input.items.map((item) => {
-    const quantity = parseDecimal(item.quantity, 4);
-    const unitPrice = parseDecimal(item.unitPrice, 4);
+    const quantity = parseDecimal(item.quantity, 2);
+    const unitPrice = parseDecimal(item.unitPrice, 2);
     if (quantity <= 0n || unitPrice < 0n) throw new Error('[ERR_VALIDATION] Invoice quantities and prices must be non-negative.');
     const totalCents = lineTotalCents(quantity, unitPrice);
     subtotalCents += totalCents;
     return {
       description: item.description,
-      quantity: formatDecimal(quantity, 4),
-      unitPrice: formatDecimal(unitPrice, 4),
+      quantity: formatDecimal(quantity, 2),
+      unitPrice: formatDecimal(unitPrice, 2),
       total: formatDecimal(totalCents, 2),
     };
   });
 
-  const taxRate = parseDecimal(input.taxRate, 4);
+  const taxRate = parseDecimal(input.taxRate, 2);
   if (taxRate < 0n) throw new Error('[ERR_VALIDATION] Tax rate must be non-negative.');
   const taxAmountCents = taxCents(subtotalCents, taxRate);
   const totalCents = subtotalCents + taxAmountCents;
@@ -191,7 +191,7 @@ export async function createInvoice(userId: string, input: CreateInvoiceInput): 
         invoice_number: input.invoiceNumber,
         status: 'Draft',
         subtotal: formatDecimal(subtotalCents, 2),
-        tax_rate: formatDecimal(taxRate, 4),
+        tax_rate: formatDecimal(taxRate, 2),
         tax_amount: formatDecimal(taxAmountCents, 2),
         total: formatDecimal(totalCents, 2),
         due_date: input.dueDate ? new Date(input.dueDate) : null,
@@ -239,10 +239,10 @@ export async function updateInvoice(
   const result = await db.transaction(async (tx) => {
     // If updating items, recalculate totals
     let subtotalCents = parseDecimal(currentInvoice.subtotal, 2);
-    let taxRate = parseDecimal(currentInvoice.taxRate, 4);
+    let taxRate = parseDecimal(currentInvoice.taxRate, 2);
 
     if (input.taxRate !== undefined) {
-      taxRate = parseDecimal(input.taxRate, 4);
+      taxRate = parseDecimal(input.taxRate, 2);
     }
 
     if (input.items) {
@@ -250,16 +250,16 @@ export async function updateInvoice(
 
       subtotalCents = 0n;
       const calculatedItems = input.items.map((item) => {
-        const quantity = parseDecimal(item.quantity, 4);
-        const unitPrice = parseDecimal(item.unitPrice, 4);
+        const quantity = parseDecimal(item.quantity, 2);
+        const unitPrice = parseDecimal(item.unitPrice, 2);
         if (quantity <= 0n || unitPrice < 0n) throw new Error('[ERR_VALIDATION] Invoice quantities and prices must be non-negative.');
         const totalCents = lineTotalCents(quantity, unitPrice);
         subtotalCents += totalCents;
         return {
           invoice_id: invoiceId,
           description: item.description,
-          quantity: formatDecimal(quantity, 4),
-          unit_price: formatDecimal(unitPrice, 4),
+          quantity: formatDecimal(quantity, 2),
+          unit_price: formatDecimal(unitPrice, 2),
           total: formatDecimal(totalCents, 2),
         };
       });
@@ -276,7 +276,7 @@ export async function updateInvoice(
         client_id: input.clientId,
         invoice_number: input.invoiceNumber,
         subtotal: formatDecimal(subtotalCents, 2),
-        tax_rate: formatDecimal(taxRate, 4),
+        tax_rate: formatDecimal(taxRate, 2),
         tax_amount: formatDecimal(taxAmountCents, 2),
         total: formatDecimal(totalCents, 2),
         due_date: input.dueDate !== undefined ? (input.dueDate ? new Date(input.dueDate) : null) : undefined,

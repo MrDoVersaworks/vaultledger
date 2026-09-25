@@ -18,6 +18,8 @@ import adminRoutes from './routes/admin.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 
 const app = express();
+// Vercel/Render place the application behind one trusted reverse proxy hop.
+app.set('trust proxy', 1);
 
 // Security Middlewares
 app.use((helmet as any)({

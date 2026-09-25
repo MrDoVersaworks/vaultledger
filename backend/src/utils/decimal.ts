@@ -25,13 +25,13 @@ export function formatDecimal(value: bigint, fractionDigits: number): string {
   return sign + whole.toString() + '.' + fraction;
 }
 
-export function lineTotalCents(quantity: bigint, unitPrice: bigint, inputScaleDigits = 4): bigint {
+export function lineTotalCents(quantity: bigint, unitPrice: bigint, inputScaleDigits = 2): bigint {
   const divisor = POW10(inputScaleDigits * 2 - 2);
   const product = quantity * unitPrice;
   return (product + divisor / 2n) / divisor;
 }
 
-export function taxCents(subtotalCents: bigint, taxRate: bigint, taxRateScaleDigits = 4): bigint {
+export function taxCents(subtotalCents: bigint, taxRate: bigint, taxRateScaleDigits = 2): bigint {
   const divisor = POW10(taxRateScaleDigits + 2);
   return (subtotalCents * taxRate + divisor / 2n) / divisor;
 }

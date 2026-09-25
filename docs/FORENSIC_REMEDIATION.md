@@ -117,7 +117,7 @@ This document is intentionally marked OPEN. No finding is considered closed mere
 
 The audit findings were re-traced after the first pass rather than assumed closed. The following additional controls are now implemented:
 
-- PostgreSQL-backed rate-limit buckets are used in production instead of the process-local express-rate-limit store. A general durable API limit is mounted at `/api`, with the tighter authentication window retained for auth routes. Rate limiting fails closed if persistent state cannot be reached.
+- PostgreSQL-backed rate-limit buckets are used in production instead of the process-local express-rate-limit store. The tighter authentication window is applied to registration/login/refresh, while the durable API limiter is applied to public contact and review submission endpoints. Rate limiting fails closed if persistent state cannot be reached.
 - Access-token revocation is persisted in PostgreSQL and checked after JWT verification, so logout/account deletion revocation survives process/instance changes. Expired revocations are cleaned during revocation.
 - Refresh-token rotation now locks the refresh-token row inside the transaction, preventing concurrent requests from successfully replaying the same one-time refresh token.
 - Current-schema migration coverage was completed for contact messages, system settings, Resend notification columns, persistent security state, review moderation, normalized email/roles, and user-scoped invoice-number uniqueness. Migration journal entries were registered through migration 0007.

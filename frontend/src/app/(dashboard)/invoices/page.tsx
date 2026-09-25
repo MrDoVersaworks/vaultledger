@@ -195,7 +195,7 @@ export default function InvoicesPage() {
       {/* Title Header Area */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
             Invoice Registry
           </h1>
           <p className="text-[var(--text-secondary)] mt-1 text-sm">
@@ -206,7 +206,7 @@ export default function InvoicesPage() {
         <button
           onClick={openCreateModal}
           disabled={clients.length === 0}
-          className="btn-emerald px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-500/10 self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-emerald px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
           id="btn-add-invoice"
         >
           <Plus size={14} className="stroke-[3]" />

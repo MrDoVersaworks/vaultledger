@@ -72,3 +72,30 @@ test('landing page does not persist authentication credentials in localStorage',
   const keys = await page.evaluate(() => Object.keys(window.localStorage));
   expect(keys.some((key) => /token|auth|refresh|access/i.test(key))).toBe(false);
 });
+
+
+test('authenticated session lifecycle rotates refresh state and logout revokes it', async ({ request }) => {
+  const email = process.env.E2E_ADMIN_EMAIL;
+  const password = process.env.E2E_ADMIN_PASSWORD;
+  test.skip(!email || !password, 'E2E administrator credentials are not configured');
+
+  const login = await request.post(`${BACKEND_URL}/api/auth/login`, {
+    data: { email, password },
+  });
+  expect(login.status()).toBe(200);
+
+  const refresh = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
+    headers: { Origin: 'http://localhost:3002' },
+  });
+  expect(refresh.status()).toBe(200);
+
+  const logout = await request.post(`${BACKEND_URL}/api/auth/logout`, {
+    headers: { Origin: 'http://localhost:3002' },
+  });
+  expect(logout.status()).toBe(200);
+
+  const afterLogout = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
+    headers: { Origin: 'http://localhost:3002' },
+  });
+  expect(afterLogout.status()).toBe(401);
+});

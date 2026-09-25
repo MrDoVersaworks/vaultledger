@@ -45,6 +45,12 @@ async function enforceRateLimit(req: Request, res: Response, next: NextFunction,
       RETURNING "hits", "reset_at"
     `);
 
+    if (Date.now() - lastCleanupAt > 60_000) {
+      lastCleanupAt = Date.now();
+      await db.execute(sql`DELETE FROM rate_limit_buckets WHERE reset_at <= NOW()`);
+      await db.execute(sql`DELETE FROM revoked_access_tokens WHERE expires_at <= NOW()`);
+    }
+
     const row = result.rows[0] as { hits: number; reset_at: Date } | undefined;
     if (!row) {
       next();

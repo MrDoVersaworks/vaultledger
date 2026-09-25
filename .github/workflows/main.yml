@@ -107,3 +107,58 @@ jobs:
           CORS_ORIGIN: http://localhost:3002
           NEXT_PUBLIC_API_URL: http://localhost:5002
         run: npx playwright test
+
+
+  e2e:
+    name: End-to-End — Public, Auth, Admin & Security
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vaultledger_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d vaultledger_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vaultledger_ci
+      JWT_ACCESS_SECRET: ci_access_secret_32_chars_minimum
+      JWT_REFRESH_SECRET: ci_refresh_secret_32_chars_minimum
+      AES_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      ADMIN_EMAIL: admin@example.com
+      PORT: 5002
+      NODE_ENV: test
+      CORS_ORIGIN: http://localhost:3002
+      NEXT_PUBLIC_API_URL: http://localhost:5002
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:5002
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            ./backend/package-lock.json
+            ./frontend/package-lock.json
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm install
+      - name: Run database migrations
+        working-directory: ./backend
+        run: npm run db:migrate
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install
+      - name: Install Playwright browser
+        working-directory: ./frontend
+        run: npx playwright install --with-deps chromium
+      - name: Run Playwright E2E suite
+        working-directory: ./frontend
+        run: npx playwright test

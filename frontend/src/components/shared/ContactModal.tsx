@@ -79,7 +79,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm font-semibold" disabled={isSubmitting}>Cancel</button>
-            <button type="submit" className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-emerald-500 to-cyan-500" disabled={isSubmitting}>{isSubmitting ? 'Sending...' : 'Send Message'}</button>
+            <button type="submit" className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)]" disabled={isSubmitting}>{isSubmitting ? 'Sending...' : 'Send Message'}</button>
           </div>
         </form>
       </div>

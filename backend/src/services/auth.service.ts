@@ -36,6 +36,9 @@ interface RegisterResult {
 
 export async function registerUser(input: RegisterInput): Promise<RegisterResult> {
   const normalizedEmail = input.email.trim().toLowerCase();
+  if (config.ADMIN_EMAIL && normalizedEmail === config.ADMIN_EMAIL.trim().toLowerCase()) {
+    throw new Error('[ERR_AUTH_EMAIL_RESERVED] The configured administrator identity cannot be registered publicly.');
+  }
   const existing = await db
     .select({ id: users.id })
     .from(users)

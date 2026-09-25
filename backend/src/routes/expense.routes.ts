@@ -88,6 +88,7 @@ router.post(
 // PUT /api/expenses/:id
 router.put(
   '/:id',
+  validate(uuidParamSchema, 'params'),
   validate(expenseSchema),
   asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.userId!;

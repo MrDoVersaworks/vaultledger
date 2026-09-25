@@ -70,7 +70,7 @@ export const invoices = pgTable('invoices', {
   notes: text('notes'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [uniqueIndex('invoices_user_invoice_number_unique').on(table.user_id, table.invoice_number)]);
 
 // ============================================================
 // TABLE: invoice_items

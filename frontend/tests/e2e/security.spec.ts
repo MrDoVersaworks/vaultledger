@@ -97,6 +97,8 @@ test('authenticated session lifecycle rotates refresh state and logout revokes i
     data: { email, password },
   });
   expect(login.status()).toBe(200);
+  const loginBody = await login.json();
+  const accessToken = loginBody.data.accessToken;
 
   const refresh = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
     headers: { Origin: FRONTEND_URL },
@@ -107,6 +109,11 @@ test('authenticated session lifecycle rotates refresh state and logout revokes i
     headers: { Origin: FRONTEND_URL },
   });
   expect(logout.status()).toBe(200);
+
+  const revokedAccess = await request.get(`${BACKEND_URL}/api/clients`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  expect(revokedAccess.status()).toBe(401);
 
   const afterLogout = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
     headers: { Origin: FRONTEND_URL },

@@ -184,8 +184,8 @@ export const invoiceItemSchema = z.object({
     .min(1, 'Description is required')
     .max(255, 'Description must not exceed 255 characters')
     .trim(),
-  quantity: z.coerce.number().positive('Quantity must be greater than 0'),
-  unitPrice: z.coerce.number().nonnegative('Unit price must be 0 or greater'),
+  quantity: z.coerce.number().positive('Quantity must be greater than 0').refine((value) => Number.isFinite(value) && Number(value.toFixed(2)) === value, 'Quantity must use at most 2 decimal places'),
+  unitPrice: z.coerce.number().nonnegative('Unit price must be 0 or greater').refine((value) => Number.isFinite(value) && Number(value.toFixed(2)) === value, 'Unit price must use at most 2 decimal places'),
 });
 
 export const invoiceSchema = z.object({
@@ -196,7 +196,7 @@ export const invoiceSchema = z.object({
     .max(50, 'Invoice number must not exceed 50 characters')
     .trim(),
   items: z.array(invoiceItemSchema).min(1, 'Invoice must contain at least 1 item'),
-  taxRate: z.coerce.number().nonnegative('Tax rate must be 0 or greater').default(0),
+  taxRate: z.coerce.number().nonnegative('Tax rate must be 0 or greater').refine((value) => Number.isFinite(value) && Number(value.toFixed(2)) === value, 'Tax rate must use at most 2 decimal places').default(0),
   dueDate: z.string().datetime({ message: 'Invalid ISO date string for due date' }).optional().nullable(),
   notes: z.string().max(2000, 'Notes must not exceed 2000 characters').trim().optional().nullable(),
 });
@@ -213,7 +213,7 @@ export const expenseSchema = z.object({
     .min(1, 'Description is required')
     .max(255, 'Description must not exceed 255 characters')
     .trim(),
-  amount: z.coerce.number().positive('Amount must be greater than 0'),
+  amount: z.coerce.number().positive('Amount must be greater than 0').refine((value) => Number.isFinite(value) && Number(value.toFixed(2)) === value, 'Amount must use at most 2 decimal places'),
   category: z.string().max(100, 'Category must not exceed 100 characters').trim().optional().nullable(),
   date: z.string().datetime({ message: 'Invalid ISO date string for expense date' }),
 });

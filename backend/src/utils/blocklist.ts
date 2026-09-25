@@ -2,8 +2,15 @@ import jwt from 'jsonwebtoken';
 import { db } from '../db/connection.js';
 import { revokedAccessTokens } from '../db/schema.js';
 import { eq, lt } from 'drizzle-orm';
+import { config } from '../config/index.js';
 
 function decodeRevocation(token: string): { signature: string; expiresAt: Date } | null {
+  try {
+    jwt.verify(token, config.JWT_ACCESS_SECRET);
+  } catch {
+    return null;
+  }
+
   const parts = token.split('.');
   if (parts.length !== 3 || !parts[2]) return null;
   const decoded = jwt.decode(token);

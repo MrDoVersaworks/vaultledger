@@ -68,6 +68,10 @@ router.post(
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
+        if ((error as any).code === '23505' && (error as any).constraint === 'invoices_user_invoice_number_unique') {
+          res.status(409).json({ success: false, error: { code: 'ERR_INVOICE_NUMBER_EXISTS', message: 'Invoice number already exists for this account.' } });
+          return;
+        }
         if (error.message.includes('ERR_CLIENT_NOT_FOUND')) {
           res.status(400).json({
             success: false,
@@ -97,6 +101,10 @@ router.put(
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
+        if ((error as any).code === '23505' && (error as any).constraint === 'invoices_user_invoice_number_unique') {
+          res.status(409).json({ success: false, error: { code: 'ERR_INVOICE_NUMBER_EXISTS', message: 'Invoice number already exists for this account.' } });
+          return;
+        }
         if (error.message.includes('ERR_INVOICE_NOT_FOUND')) {
           res.status(404).json({
             success: false,

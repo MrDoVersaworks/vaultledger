@@ -76,10 +76,10 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">
-            Financial Cockpit
+            Dashboard
           </h1>
           <p className="text-[var(--text-secondary)] mt-1 text-sm">
-            Overview of your active business accounting flows and cash balances
+            Overview of your invoices, expenses, and receivables
           </p>
         </div>
 
@@ -122,7 +122,6 @@ export default function DashboardPage() {
 
         {/* Total Expenses Card */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-default)] p-6 rounded-2xl flex flex-col relative overflow-hidden backdrop-blur-md shadow-sm">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-bl-full pointer-events-none" />
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Expenses</span>
             <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/10 flex items-center justify-center text-rose-500">
@@ -139,7 +138,6 @@ export default function DashboardPage() {
 
         {/* Outstanding Card */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-default)] p-6 rounded-2xl flex flex-col relative overflow-hidden backdrop-blur-md shadow-sm">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-bl-full pointer-events-none" />
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Outstanding Receivables</span>
             <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/10 flex items-center justify-center text-amber-500">
@@ -156,7 +154,6 @@ export default function DashboardPage() {
 
         {/* Net Profit Card */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-default)] p-6 rounded-2xl flex flex-col relative overflow-hidden backdrop-blur-md shadow-sm">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-bl-full pointer-events-none" />
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Net Balances</span>
             <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/10 flex items-center justify-center text-cyan-500">

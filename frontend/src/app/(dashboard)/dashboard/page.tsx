@@ -75,7 +75,7 @@ export default function DashboardPage() {
       {/* Upper Title Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">
             Financial Cockpit
           </h1>
           <p className="text-[var(--text-secondary)] mt-1 text-sm">

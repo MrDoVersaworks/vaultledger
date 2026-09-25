@@ -1,4 +1,4 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { invoices, invoiceItems, clients } from '../db/schema.js';
 import { ErrorCode } from '../constants/index.js';
@@ -31,6 +31,12 @@ interface UpdateInvoiceInput {
   notes?: string | null;
 }
 
+function normalizeDueDate(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return new Date(`${value}T12:00:00.000Z`);
+  return new Date(value);
+}
+
 function mapToInvoiceItemResponse(row: typeof invoiceItems.$inferSelect): InvoiceItemResponse {
   return {
     id: row.id,
@@ -53,28 +59,20 @@ export async function getInvoices(userId: string): Promise<InvoiceResponse[]> {
     .where(eq(invoices.user_id, userId));
 
   const invoiceIds = rows.map((r) => r.invoice.id);
-
-  let itemsRows: (typeof invoiceItems.$inferSelect)[] = [];
-  if (invoiceIds.length > 0) {
-    itemsRows = await db
-      .select()
-      .from(invoiceItems)
-      .where(
-        eq(invoiceItems.invoice_id, invoiceIds[0]) // default fallback if 1 item, or we fetch all if many using inArray
-      );
-
-    // Drizzle inArray or separate query per invoice. Let's do a fast query mapping for safety:
-    // To ensure perfect type safety and avoid complex inArray import failures:
+  const itemsRows = invoiceIds.length > 0
+    ? await db.select().from(invoiceItems).where(inArray(invoiceItems.invoice_id, invoiceIds))
+    : [];
+  const itemsByInvoice = new Map<string, (typeof invoiceItems.$inferSelect)[]>();
+  for (const item of itemsRows) {
+    const existing = itemsByInvoice.get(item.invoice_id) ?? [];
+    existing.push(item);
+    itemsByInvoice.set(item.invoice_id, existing);
   }
 
   const results: InvoiceResponse[] = [];
 
   for (const row of rows) {
-    const items = await db
-      .select()
-      .from(invoiceItems)
-      .where(eq(invoiceItems.invoice_id, row.invoice.id));
-
+    const items = itemsByInvoice.get(row.invoice.id) ?? [];
     results.push({
       id: row.invoice.id,
       userId: row.invoice.user_id,
@@ -194,7 +192,7 @@ export async function createInvoice(userId: string, input: CreateInvoiceInput): 
         tax_rate: formatDecimal(taxRate, 2),
         tax_amount: formatDecimal(taxAmountCents, 2),
         total: formatDecimal(totalCents, 2),
-        due_date: input.dueDate ? new Date(input.dueDate) : null,
+        due_date: normalizeDueDate(input.dueDate),
         notes: input.notes || null,
       })
       .returning();
@@ -279,7 +277,7 @@ export async function updateInvoice(
         tax_rate: formatDecimal(taxRate, 2),
         tax_amount: formatDecimal(taxAmountCents, 2),
         total: formatDecimal(totalCents, 2),
-        due_date: input.dueDate !== undefined ? (input.dueDate ? new Date(input.dueDate) : null) : undefined,
+        due_date: input.dueDate !== undefined ? normalizeDueDate(input.dueDate) : undefined,
         notes: input.notes !== undefined ? input.notes : undefined,
         updated_at: new Date(),
       })

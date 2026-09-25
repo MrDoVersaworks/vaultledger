@@ -24,14 +24,12 @@ interface InvoiceItemFormLine {
   unitPrice: number;
 }
 
-function toCents(value: number): bigint {
-  return BigInt(Math.round(value * 100));
+function toCents(value: number): number {
+  return Math.round(value * 100);
 }
 
-function formatCents(cents: bigint): string {
-  const sign = cents < 0n ? '-' : '';
-  const absolute = cents < 0n ? -cents : cents;
-  return `${sign}${absolute / 100n}.${(absolute % 100n).toString().padStart(2, '0')}`;
+function formatCents(cents: number): string {
+  return (cents / 100).toFixed(2);
 }
 
 export default function InvoicesPage() {
@@ -105,11 +103,11 @@ export default function InvoicesPage() {
 
   // Calculate Running Totals dynamically
   const subtotalCents = items.reduce(
-    (sum, item) => sum + ((toCents(item.quantity) * toCents(item.unitPrice) + 50n) / 100n),
-    0n,
+    (sum, item) => sum + Math.round((toCents(item.quantity) * toCents(item.unitPrice)) / 100),
+    0,
   );
   const taxRateCents = toCents(taxRate);
-  const taxAmountCents = (subtotalCents * taxRateCents + 5000n) / 10000n;
+  const taxAmountCents = Math.round((subtotalCents * taxRateCents) / 10000);
   const totalCents = subtotalCents + taxAmountCents;
   const subtotal = Number(formatCents(subtotalCents));
   const taxAmount = Number(formatCents(taxAmountCents));

@@ -111,3 +111,61 @@ GitHub status on the current remediation tip reported Vercel failures caused by 
 ## Closure rule
 
 This document is intentionally marked OPEN. No finding is considered closed merely because code was changed. Closure requires positive defect evidence plus regression/preservation evidence.
+
+## Subsequent remediation batch
+
+The audit findings were re-traced after the first pass rather than assumed closed. The following additional controls are now implemented:
+
+- PostgreSQL-backed rate-limit buckets are used in production instead of the process-local express-rate-limit store. A general durable API limit is mounted at `/api`, with the tighter authentication window retained for auth routes. Rate limiting fails closed if persistent state cannot be reached.
+- Access-token revocation is persisted in PostgreSQL and checked after JWT verification, so logout/account deletion revocation survives process/instance changes. Expired revocations are cleaned during revocation.
+- Refresh-token rotation now locks the refresh-token row inside the transaction, preventing concurrent requests from successfully replaying the same one-time refresh token.
+- Current-schema migration coverage was completed for contact messages, system settings, Resend notification columns, persistent security state, review moderation, normalized email/roles, and user-scoped invoice-number uniqueness. Migration journal entries were registered through migration 0007.
+- Invoice quantity, unit-price, tax-rate, and expense amount validation now enforce the database precision/range contract. Browser date-only invoice due dates are accepted and normalized at the API boundary without changing the calendar date.
+- Invoice numbers are unique per user at the database boundary and duplicate conflicts have a stable 409 contract.
+- Dashboard financial sums remain decimal in PostgreSQL through aggregation; monthly presentation converts only the final grouped values for chart rendering. Outstanding receivables include both Sent and Overdue invoices.
+- Client/invoice/expense resource IDs are validated as UUIDs at the route boundary.
+- Legal pages no longer call nonexistent `/api/v1/public/legal/*` endpoints or render server-provided HTML through `dangerouslySetInnerHTML`; they are self-contained static pages.
+- Public review moderation now has a stable admin DTO and an admin review moderation page with approve/delete actions.
+- CI now contains backend unit/build gates, frontend type/build gates, database migration execution, and a Playwright E2E job. The Playwright suite was updated for the moderated review workflow, removed shared-demo assumptions, credential-free localStorage checks, trusted-origin refresh/logout behavior, and authenticated admin moderation/session lifecycle coverage.
+- The frontend visual layer was simplified after the functional/security work: excessive gradient treatment and decorative blobs were removed from the affected screens, product language was normalized, and the existing functionality/navigation was preserved.
+
+## Infrastructure verification
+
+Vercel currently has two VaultLedger projects:
+- `vaultledger` (Next.js frontend)
+- `vaultledger-wa2z` (Express backend)
+
+Both production projects currently point at `main` commit `ea65b9d027fcae3654cc50a3083d9c0a38364716`. No remediation branch has been promoted to production.
+
+The latest known production Vercel builds from `main` completed successfully. The Vercel Git status checks associated with the remediation branch are currently blocked by Vercel build-rate-limit/account targets; this is an infrastructure/quota limitation rather than evidence of a source compiler failure.
+
+Runtime verification of `audit-remediation` is therefore still not closed: the connected GitHub integration exposes workflow inspection but no workflow-dispatch capability, and the current Vercel rate limit prevents a remediation preview deployment from being used as the final runtime oracle.
+
+## Verification ledger
+
+| Finding | Static remediation | Targeted regression evidence | Runtime/E2E evidence | Status |
+|---|---|---|---|---|
+| VL-001 shared sandbox | Removed | E2E asserts no shared-demo credential language | Pending full preview E2E | Open pending runtime |
+| VL-002 cache isolation | Canonical `req.userId` cache key | Static route inspection | Pending A-B-A integration | Open pending runtime |
+| VL-003 localStorage token | Access token memory-only | localStorage E2E assertion | Pending full auth browser flow | Open pending runtime |
+| VL-004–008 session lifecycle | Rotation, origin guard, 401 failures, durable revocation | Auth code + E2E lifecycle | Pending full production-like runtime | Open pending runtime |
+| VL-009–013 financial integrity | Fixed-point arithmetic, bounds, DB aggregation, invoice uniqueness | Decimal + contract tests | Pending PostgreSQL integration | Open pending runtime |
+| VL-014–017 contact/reviews | Server-owned contact/review contracts + moderation | E2E public/moderation coverage | Pending full preview E2E | Open pending runtime |
+| VL-018–021 admin/settings/rate limits | DTOs, route contracts, durable limiter | E2E unauthorized/admin checks | Pending multi-instance/runtime test | Open pending runtime |
+| VL-022 currency | Explicit single-currency USD policy | Static policy evidence | Pending UI-wide currency audit | Open pending runtime |
+| VL-023 CI | Build/test/migration/Playwright gates added | Workflow source inspection | Workflow runs unavailable through connected GitHub tool | Open pending CI execution |
+| VL-024 due date | Date-only contract + UTC-noon normalization | Contract test | Pending UI create/reload E2E | Open pending runtime |
+| VL-025 admin identity | DB role + normalized email + reserved configured admin identity | Migration/static inspection | Pending role matrix E2E | Open pending runtime |
+| VL-026 legal | Self-contained static pages | Static source inspection | Pending browser XSS/network assertions | Open pending runtime |
+| VL-027 admin UI | Role-aware client guard | Static source inspection | Pending ordinary-user browser matrix | Open pending runtime |
+| VL-028 API URL | Central fail-closed production config | Static source inspection | Pending production config smoke | Open pending runtime |
+| VL-029 IDs | UUID params validated | Contract tests | Pending malformed-ID HTTP matrix | Open pending runtime |
+| VL-030 review state | Server-backed pending/approved lifecycle | Moderation E2E source | Pending execution | Open pending runtime |
+| VL-031 AI screening | Client-controlled screening removed | Static contact contract inspection | Pending contact integration | Open pending runtime |
+| VL-032 outstanding receivables | Sent + Overdue exact SQL aggregation | Static service inspection | Pending financial fixture | Open pending runtime |
+| VL-033 session bootstrap | Refresh returns authoritative user DTO | Static auth/frontend inspection | Pending hard-reload browser test | Open pending runtime |
+| VL-012 N+1 | Batched invoice-item query | Static query inspection | Pending query-count/performance test | Open pending runtime |
+
+## Current closure rule
+
+The remediation branch is **not declared fully closed** while runtime/CI evidence remains unavailable. Source changes are documented, but a green source tree is not being substituted for execution evidence. `main` remains untouched.

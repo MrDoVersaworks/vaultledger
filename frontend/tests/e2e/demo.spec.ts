@@ -52,7 +52,7 @@ test.describe('VaultLedger — Public & User Features', () => {
     expect(res.status()).toBe(200);
   });
 
-  test('POST /public/reviews submits a new customer review', async ({ request }) => {
+  test('POST /public/reviews submits a review for moderation', async ({ request }) => {
     const res = await request.post(`${BACKEND_URL}/api/public/reviews`, {
       data: {
         name: 'Finance Controller',
@@ -60,7 +60,7 @@ test.describe('VaultLedger — Public & User Features', () => {
         feedback: 'VaultLedger simplified our corporate ledger reconciliation immensely.',
       },
     });
-    expect([200, 201, 400]).toContain(res.status());
+    expect(res.status()).toBe(201);
   });
 
   test('POST /contact submits a contact message', async ({ request }) => {
@@ -71,7 +71,7 @@ test.describe('VaultLedger — Public & User Features', () => {
         message: 'Requesting enterprise security audit details for VaultLedger.',
       },
     });
-    expect([200, 201, 400]).toContain(res.status());
+    expect(res.status()).toBe(201);
   });
 
   /* ---- Auth API Failure Checks ---- */
@@ -86,4 +86,10 @@ test.describe('VaultLedger — Public & User Features', () => {
     });
     expect([400, 401]).toContain(res.status());
   });
+});
+
+
+test('landing page no longer exposes shared demo credentials', async ({ page }) => {
+  await page.goto(FRONTEND_URL);
+  await expect(page.getByText(/recruiter sandbox|demo password|shared demo/i)).toHaveCount(0);
 });

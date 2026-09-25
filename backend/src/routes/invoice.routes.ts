@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
-import { invoiceSchema, invoiceStatusSchema } from '../types/index.js';
+import { invoiceSchema, invoiceStatusSchema, uuidParamSchema } from '../types/index.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   getInvoices,
@@ -29,7 +29,7 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<void> 
 }));
 
 // GET /api/invoices/:id
-router.get('/:id', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.get('/:id', validate(uuidParamSchema, 'params'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId!;
   const invoiceId = req.params.id;
 
@@ -128,6 +128,7 @@ router.put(
 // PATCH /api/invoices/:id/status
 router.patch(
   '/:id/status',
+  validate(uuidParamSchema, 'params'),
   validate(invoiceStatusSchema),
   asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.userId!;
@@ -157,7 +158,7 @@ router.patch(
 );
 
 // DELETE /api/invoices/:id
-router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.delete('/:id', validate(uuidParamSchema, 'params'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId!;
   const invoiceId = req.params.id;
 

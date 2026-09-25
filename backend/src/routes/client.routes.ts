@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
-import { clientSchema } from '../types/index.js';
+import { clientSchema, uuidParamSchema } from '../types/index.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   getClients,
@@ -27,7 +27,7 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<void> 
 }));
 
 // GET /api/clients/:id
-router.get('/:id', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.get('/:id', validate(uuidParamSchema, 'params'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId!;
   const clientId = req.params.id;
 
@@ -92,7 +92,7 @@ router.put(
 );
 
 // DELETE /api/clients/:id
-router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.delete('/:id', validate(uuidParamSchema, 'params'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId!;
   const clientId = req.params.id;
 

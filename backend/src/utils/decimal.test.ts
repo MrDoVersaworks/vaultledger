@@ -19,3 +19,13 @@ test('tax calculation is fixed point', () => {
   const rate = parseDecimal('7.25', 2);
   assert.equal(formatDecimal(taxCents(subtotal, rate), 2), '7.25');
 });
+
+test('database-scale invoice arithmetic uses two decimal places', () => {
+  const quantity = parseDecimal('1.23', 2);
+  const unitPrice = parseDecimal('2.00', 2);
+  assert.equal(formatDecimal(lineTotalCents(quantity, unitPrice, 2), 2), '2.46');
+
+  const subtotal = parseDecimal('100.00', 2);
+  const rate = parseDecimal('7.25', 2);
+  assert.equal(formatDecimal(taxCents(subtotal, rate, 2), 2), '7.25');
+});

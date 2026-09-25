@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const BACKEND_URL = 'http://localhost:5002';
+const BACKEND_URL = process.env.PLAYWRIGHT_BACKEND_URL?.trim() || 'http://localhost:5002';
 
 test.describe('VaultLedger — Security & Data Protection (SIL Rules)', () => {
   /* ---- User Scoping & Unauthorized Access (SIL-3) ---- */

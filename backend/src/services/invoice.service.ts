@@ -4,7 +4,8 @@ import { invoices, invoiceItems, clients } from '../db/schema.js';
 import { ErrorCode } from '../constants/index.js';
 import { logger } from '../utils/logger.js';
 import { getClientById } from './client.service.js';
-import type { InvoiceResponse, InvoiceItemResponse } from '../types/index.js';\nimport { parseDecimal, formatDecimal, lineTotalCents, taxCents } from '../utils/decimal.js';
+import type { InvoiceResponse, InvoiceItemResponse } from '../types/index.js';
+import { parseDecimal, formatDecimal, lineTotalCents, taxCents } from '../utils/decimal.js';
 
 interface InvoiceItemInput {
   description: string;

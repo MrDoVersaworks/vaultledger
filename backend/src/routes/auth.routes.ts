@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
+import { trustedOriginGuard } from '../middleware/originGuard.js';
 import { authRateLimiter } from '../middleware/rateLimiter.js';
 import { validate } from '../middleware/validate.js';
 import { registerSchema, loginSchema, deleteAccountSchema } from '../types/index.js';
@@ -57,7 +58,7 @@ router.post(
       res.cookie(REFRESH_COOKIE_NAME, result.refreshToken, {
         httpOnly: true,
         secure: config.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: config.NODE_ENV === 'production' ? 'none' : 'strict',
         maxAge: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
         path: '/',
       });
@@ -83,28 +84,29 @@ router.post(
 );
 
 // POST /api/auth/refresh
-router.post('/refresh', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.post('/refresh', trustedOriginGuard, asyncHandler(async (req: Request, res: Response): Promise<void> => {
   try {
     const refreshToken = req.cookies[REFRESH_COOKIE_NAME];
 
     if (!refreshToken) {
-      res.status(200).json({
+      res.status(401).json({
         success: false,
         error: { code: 'ERR_AUTH_REFRESH_FAILED', message: 'No refresh token provided.' },
       });
       return;
     }
 
-    const accessToken = await refreshAccessToken(refreshToken);
-
-    res.status(200).json({
-      success: true,
-      data: { accessToken },
+    const result = await refreshAccessToken(refreshToken);
+    res.cookie(REFRESH_COOKIE_NAME, result.refreshToken, {
+      httpOnly: true, secure: config.NODE_ENV === 'production',
+      sameSite: config.NODE_ENV === 'production' ? 'none' : 'strict',
+      maxAge: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000, path: '/',
     });
+    res.status(200).json({ success: true, data: { accessToken: result.accessToken, user: result.user } });
   } catch (error: unknown) {
     if (error instanceof Error && error.message.includes('ERR_AUTH_REFRESH_FAILED')) {
       res.clearCookie(REFRESH_COOKIE_NAME, { path: '/' });
-      res.status(200).json({
+      res.status(401).json({
         success: false,
         error: { code: 'ERR_AUTH_REFRESH_FAILED', message: 'Invalid or expired refresh token. Please log in again.' },
       });
@@ -115,7 +117,7 @@ router.post('/refresh', asyncHandler(async (req: Request, res: Response): Promis
 }));
 
 // POST /api/auth/logout
-router.post('/logout', authMiddleware, asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.post('/logout', trustedOriginGuard, asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const refreshToken = req.cookies[REFRESH_COOKIE_NAME];
 
   if (refreshToken) {

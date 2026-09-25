@@ -52,3 +52,16 @@ test.describe('VaultLedger — Security & Data Protection (SIL Rules)', () => {
     expect(allowOrigin).not.toBe('*');
   });
 });
+
+
+test('refresh and logout require a trusted browser origin', async ({ request }) => {
+  const refresh = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
+    headers: { Origin: 'https://unauthorized-domain.com' },
+  });
+  expect(refresh.status()).toBe(403);
+
+  const logout = await request.post(`${BACKEND_URL}/api/auth/logout`, {
+    headers: { Origin: 'https://unauthorized-domain.com' },
+  });
+  expect(logout.status()).toBe(403);
+});

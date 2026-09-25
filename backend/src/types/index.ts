@@ -45,6 +45,7 @@ export interface AuthenticatedUser {
   email: string;
   name: string;
   businessName: string | null;
+  role: string;
 }
 
 // ============================================================

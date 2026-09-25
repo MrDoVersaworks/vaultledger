@@ -166,7 +166,7 @@ export async function createInvoice(userId: string, input: CreateInvoiceInput): 
     const quantity = parseDecimal(item.quantity, 2);
     const unitPrice = parseDecimal(item.unitPrice, 2);
     if (quantity <= 0n || unitPrice < 0n) throw new Error('[ERR_VALIDATION] Invoice quantities and prices must be non-negative.');
-    const totalCents = lineTotalCents(quantity, unitPrice);
+    const totalCents = lineTotalCents(quantity, unitPrice, 2);
     subtotalCents += totalCents;
     return {
       description: item.description,
@@ -178,7 +178,7 @@ export async function createInvoice(userId: string, input: CreateInvoiceInput): 
 
   const taxRate = parseDecimal(input.taxRate, 2);
   if (taxRate < 0n) throw new Error('[ERR_VALIDATION] Tax rate must be non-negative.');
-  const taxAmountCents = taxCents(subtotalCents, taxRate);
+  const taxAmountCents = taxCents(subtotalCents, taxRate, 2);
   const totalCents = subtotalCents + taxAmountCents;
 
   // Run in database transaction

@@ -105,7 +105,7 @@ export default function InvoicesPage() {
 
   // Calculate Running Totals dynamically
   const subtotalCents = items.reduce(
-    (sum, item) => sum + toCents(item.quantity * item.unitPrice),
+    (sum, item) => sum + ((toCents(item.quantity) * toCents(item.unitPrice) + 50n) / 100n),
     0n,
   );
   const taxRateCents = toCents(taxRate);

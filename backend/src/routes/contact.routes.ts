@@ -3,6 +3,7 @@ import { db } from '../db/connection.js';
 import { contactMessages } from '../db/schema.js';
 import { z } from 'zod';
 import { AppError } from '../middleware/errorHandler.js';
+import { apiRateLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
@@ -12,7 +13,7 @@ const contactSchema = z.object({
   message: z.string().min(10, 'Message must be at least 10 characters').max(5000),
 });
 
-router.post('/', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post('/', apiRateLimiter, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const parsed = contactSchema.parse(req.body);
 

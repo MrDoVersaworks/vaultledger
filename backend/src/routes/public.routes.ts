@@ -7,8 +7,14 @@ const router = Router();
 router.get('/settings', async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const settingsArray = await db.select().from(systemSettings).limit(1);
-    const settings = settingsArray[0] || { google_analytics_id: '', termly_uuid: '' };
-    res.status(200).json({ success: true, data: settings });
+    const settings = settingsArray[0];
+    res.status(200).json({
+      success: true,
+      data: {
+        googleAnalyticsId: settings?.google_analytics_id ?? '',
+        termlyUuid: settings?.termly_uuid ?? '',
+      },
+    });
   } catch (error) {
     next(error);
   }

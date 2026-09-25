@@ -134,6 +134,23 @@ router.get('/reviews', async (_req: Request, res: Response, next: NextFunction):
   }
 });
 
+router.patch('/reviews/:id/approve', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const [updated] = await db.update(platformReviews)
+      .set({ status: 'approved', updated_at: new Date() })
+      .where(eq(platformReviews.id, id as any))
+      .returning();
+    if (!updated) {
+      next(new AppError('[ERR_REVIEW_NOT_FOUND] Review not found.', 404));
+      return;
+    }
+    res.status(200).json({ success: true, data: updated });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.delete('/reviews/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;

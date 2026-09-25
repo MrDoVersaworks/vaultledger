@@ -18,12 +18,12 @@ import {
 import { motion } from 'framer-motion';
 
 function formatMoney(value: string | number): string {
-  const cents = BigInt(Math.round(Number(value) * 100));
-  const sign = cents < 0n ? '-' : '';
-  const absolute = cents < 0n ? -cents : cents;
-  const whole = absolute / 100n;
-  const fraction = (absolute % 100n).toString().padStart(2, '0');
-  return `${sign}${whole.toLocaleString('en-US')}.${fraction}`;
+  const cents = Math.round(Number(value) * 100);
+  const sign = cents < 0 ? '-' : '';
+  const absolute = Math.abs(cents);
+  const whole = Math.floor(absolute / 100);
+  const fraction = String(absolute % 100).padStart(2, '0');
+  return sign + whole.toLocaleString('en-US') + '.' + fraction;
 }
 
 export default function DashboardPage() {
@@ -57,8 +57,8 @@ export default function DashboardPage() {
     loadDashboardData();
   }, []);
 
-  const totalRevenueCents = BigInt(Math.round(Number(summary?.totalRevenue || 0) * 100));
-  const totalExpensesCents = BigInt(Math.round(Number(summary?.totalExpenses || 0) * 100));
+  const totalRevenueCents = Math.round(Number(summary?.totalRevenue || 0) * 100);
+  const totalExpensesCents = Math.round(Number(summary?.totalExpenses || 0) * 100);
   const profitCents = totalRevenueCents - totalExpensesCents;
 
   if (isLoading) {
@@ -161,7 +161,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className={`text-2xl font-black mt-4 ${profitCents >= 0n ? 'text-emerald-500' : 'text-rose-500'}`}>
-            ${formatMoney(Number(profitCents) / 100)}
+            ${formatMoney(profitCents / 100)}
           </div>
           <div className="text-[11px] text-[var(--text-secondary)] font-semibold mt-1">
             Realized cash flow margin

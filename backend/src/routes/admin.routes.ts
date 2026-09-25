@@ -5,6 +5,8 @@ import { eq, desc } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.js';
 import { ownerMiddleware } from '../middleware/owner.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { validate } from '../middleware/validate.js';
+import { uuidParamSchema } from '../types/index.js';
 
 const router = Router();
 
@@ -37,7 +39,7 @@ router.get('/inbox', async (_req: Request, res: Response, next: NextFunction): P
 });
 
 // PATCH /api/admin/inbox/:id/read - Mark message as read
-router.patch('/inbox/:id/read', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.patch('/inbox/:id/read', validate(uuidParamSchema, 'params'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -70,7 +72,7 @@ router.patch('/inbox/:id/read', async (req: Request, res: Response, next: NextFu
 });
 
 // DELETE /api/admin/inbox/:id - Delete message
-router.delete('/inbox/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.delete('/inbox/:id', validate(uuidParamSchema, 'params'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -161,7 +163,7 @@ router.get('/reviews', async (_req: Request, res: Response, next: NextFunction):
   }
 });
 
-router.patch('/reviews/:id/approve', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.patch('/reviews/:id/approve', validate(uuidParamSchema, 'params'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
     const [updated] = await db.update(platformReviews)
@@ -178,7 +180,7 @@ router.patch('/reviews/:id/approve', async (req: Request, res: Response, next: N
   }
 });
 
-router.delete('/reviews/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.delete('/reviews/:id', validate(uuidParamSchema, 'params'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
     const [deleted] = await db.delete(platformReviews).where(eq(platformReviews.id, id as any)).returning();

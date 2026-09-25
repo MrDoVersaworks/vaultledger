@@ -33,7 +33,7 @@ interface UpdateInvoiceInput {
 
 function normalizeDueDate(value: string | null | undefined): Date | null {
   if (!value) return null;
-  if (/^\d{4}-\\d{2}-\\d{2}$/.test(value)) return new Date(`${value}T12:00:00.000Z`);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date(`${value}T12:00:00.000Z`);
   return new Date(value);
 }
 
@@ -251,7 +251,7 @@ export async function updateInvoice(
         const quantity = parseDecimal(item.quantity, 2);
         const unitPrice = parseDecimal(item.unitPrice, 2);
         if (quantity <= 0n || unitPrice < 0n) throw new Error('[ERR_VALIDATION] Invoice quantities and prices must be non-negative.');
-        const totalCents = lineTotalCents(quantity, unitPrice);
+        const totalCents = lineTotalCents(quantity, unitPrice, 2);
         subtotalCents += totalCents;
         return {
           invoice_id: invoiceId,
@@ -265,7 +265,7 @@ export async function updateInvoice(
       await tx.insert(invoiceItems).values(calculatedItems);
     }
 
-    const taxAmountCents = taxCents(subtotalCents, taxRate);
+    const taxAmountCents = taxCents(subtotalCents, taxRate, 2);
     const totalCents = subtotalCents + taxAmountCents;
 
     const updatedInvoices = await tx

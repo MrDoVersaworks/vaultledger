@@ -2,6 +2,7 @@ import { eq, and, sql } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { invoices, expenses } from '../db/schema.js';
 import type { DashboardSummaryResponse, MonthlyDashboardData } from '../types/index.js';
+import { parseDecimal, formatDecimal } from '../utils/decimal.js';
 
 export async function getDashboardSummary(userId: string): Promise<DashboardSummaryResponse> {
   // 1. Total Paid Revenue (status = 'Paid')
@@ -52,8 +53,8 @@ export async function getMonthlyTrend(userId: string): Promise<MonthlyDashboardD
     const label = d.toLocaleString('en-US', { month: 'short', year: '2-digit' });
     months.push({
       month: label,
-      revenue: 0,
-      expenses: 0,
+      revenueCents: 0n,
+      expensesCents: 0n,
     });
   }
 
@@ -94,7 +95,7 @@ export async function getMonthlyTrend(userId: string): Promise<MonthlyDashboardD
     const invMonth = inv.paidDate.toLocaleString('en-US', { month: 'short', year: '2-digit' });
     const bucket = months.find((m) => m.month === invMonth);
     if (bucket) {
-      bucket.revenue += Number(inv.total);
+      bucket.revenueCents += parseDecimal(inv.total, 2);
     }
   }
 
@@ -102,14 +103,14 @@ export async function getMonthlyTrend(userId: string): Promise<MonthlyDashboardD
     const expMonth = exp.date.toLocaleString('en-US', { month: 'short', year: '2-digit' });
     const bucket = months.find((m) => m.month === expMonth);
     if (bucket) {
-      bucket.expenses += Number(exp.amount);
+      bucket.expensesCents += parseDecimal(exp.amount, 2);
     }
   }
 
   // Format numeric values cleanly to 2 decimal points in numbers
   return months.map((m) => ({
     month: m.month,
-    revenue: Number(m.revenue.toFixed(2)),
-    expenses: Number(m.expenses.toFixed(2)),
+    revenue: Number(formatDecimal(m.revenueCents, 2)),
+    expenses: Number(formatDecimal(m.expensesCents, 2)),
   }));
 }

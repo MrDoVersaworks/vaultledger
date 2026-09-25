@@ -2,7 +2,6 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { db } from '../db/connection.js';
 import { systemSettings, platformReviews } from '../db/schema.js';
 import { desc, eq } from 'drizzle-orm';
-import { apiRateLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
@@ -38,7 +37,7 @@ router.get('/reviews', async (_req: Request, res: Response): Promise<void> => {
   res.status(200).json({ success: true, data });
 });
 
-router.post('/reviews', apiRateLimiter, async (req: Request, res: Response): Promise<void> => {
+router.post('/reviews', async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, profession, rating, feedback } = req.body;
     const normalizedName = String(name ?? '').trim();

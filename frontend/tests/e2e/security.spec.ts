@@ -30,6 +30,19 @@ test.describe('VaultLedger — Security & Data Protection (SIL Rules)', () => {
     expect(res.status()).toBe(401);
   });
 
+
+  test('resource endpoints reject malformed UUID identifiers', async ({ request }) => {
+    const endpoints = [
+      '/api/clients/not-a-uuid',
+      '/api/invoices/not-a-uuid',
+      '/api/expenses/not-a-uuid',
+    ];
+    for (const endpoint of endpoints) {
+      const res = await request.get(BACKEND_URL + endpoint);
+      expect(res.status()).toBe(400);
+    }
+  });
+
   /* ---- Error Format Standardizing (SIL-23) ---- */
   test('error responses format with capitalized sentence structure', async ({ request }) => {
     const res = await request.post(`${BACKEND_URL}/api/auth/login`, {

@@ -48,6 +48,9 @@ async function refreshToken(): Promise<string> {
 
 export async function apiRequest<T>(options: RequestOptions): Promise<T> {
   const { method, path, body, requiresAuth = true } = options;
+  if (!API_BASE_URL) {
+    throw new Error('[ERR_CONFIG_API_BASE_URL] NEXT_PUBLIC_API_URL is required in production.');
+  }
 
   const headers: Record<string, string> = {};
 

@@ -40,16 +40,19 @@ router.get('/reviews', async (_req: Request, res: Response): Promise<void> => {
 router.post('/reviews', async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, profession, rating, feedback } = req.body;
-    if (!name || !feedback) {
-      res.status(400).json({ success: false, message: '[ERR_VALIDATION] Name and feedback are required.' });
+    const normalizedName = String(name ?? '').trim();
+    const normalizedFeedback = String(feedback ?? '').trim();
+    const normalizedRating = Number(rating);
+    if (!normalizedName || !normalizedFeedback || !Number.isInteger(normalizedRating) || normalizedRating < 1 || normalizedRating > 5 || normalizedName.length > 100 || normalizedFeedback.length > 2000) {
+      res.status(400).json({ success: false, message: '[ERR_VALIDATION] Invalid review fields.' });
       return;
     }
 
     const [inserted] = await db.insert(platformReviews).values({
-      name: String(name).trim(),
-      profession: profession ? String(profession).trim() : 'User',
-      rating: Number(rating) || 5,
-      feedback: String(feedback).trim(),
+      name: normalizedName,
+      profession: profession ? String(profession).trim().slice(0, 100) : 'User',
+      rating: normalizedRating,
+      feedback: normalizedFeedback,
       status: 'pending',
     }).returning();
 

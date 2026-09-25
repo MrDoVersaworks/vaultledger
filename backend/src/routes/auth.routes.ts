@@ -7,7 +7,7 @@ import { registerSchema, loginSchema, deleteAccountSchema } from '../types/index
 import { config } from '../config/index.js';
 import { REFRESH_COOKIE_NAME, REFRESH_TOKEN_EXPIRY_DAYS } from '../constants/index.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { jwtBlocklist } from '../utils/blocklist.js';
+import { revokeAccessToken } from '../utils/blocklist.js';
 import {
   registerUser,
   loginUser,
@@ -84,7 +84,7 @@ router.post(
 );
 
 // POST /api/auth/refresh
-router.post('/refresh', trustedOriginGuard, asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.post('/refresh', authRateLimiter, trustedOriginGuard, asyncHandler(async (req: Request, res: Response): Promise<void> => {
   try {
     const refreshToken = req.cookies[REFRESH_COOKIE_NAME];
 
@@ -128,10 +128,7 @@ router.post('/logout', trustedOriginGuard, asyncHandler(async (req: Request, res
   if (authHeader) {
     const token = authHeader.split(' ')[1];
     if (token) {
-      const signature = token.split('.')[2];
-      if (signature) {
-        jwtBlocklist.add(signature);
-      }
+      await revokeAccessToken(token);
     }
   }
 

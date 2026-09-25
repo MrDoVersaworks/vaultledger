@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 const BACKEND_URL = process.env.PLAYWRIGHT_BACKEND_URL?.trim() || 'http://localhost:5002';
+const FRONTEND_URL = process.env.PLAYWRIGHT_BASE_URL?.trim() || 'http://localhost:3002';
 
 test.describe('VaultLedger — Security & Data Protection (SIL Rules)', () => {
   /* ---- User Scoping & Unauthorized Access (SIL-3) ---- */
@@ -68,7 +69,7 @@ test('refresh and logout require a trusted browser origin', async ({ request }) 
 
 
 test('landing page does not persist authentication credentials in localStorage', async ({ page }) => {
-  await page.goto('http://localhost:3002');
+  await page.goto(FRONTEND_URL);
   const keys = await page.evaluate(() => Object.keys(window.localStorage));
   expect(keys.some((key) => /token|auth|refresh|access/i.test(key))).toBe(false);
 });

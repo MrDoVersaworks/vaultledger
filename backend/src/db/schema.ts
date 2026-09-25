@@ -1,4 +1,5 @@
-import { pgTable, uuid, varchar, text, timestamp, boolean, numeric, integer } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, timestamp, boolean, numeric, integer, uniqueIndex } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { relations } from 'drizzle-orm';
 
 // ============================================================
@@ -9,6 +10,7 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 255 }).notNull().unique(),
   password_hash: varchar('password_hash', { length: 255 }).notNull(),
   name: varchar('name', { length: 100 }).notNull(),
+  role: varchar('role', { length: 20 }).notNull().default('user'),
   business_name: varchar('business_name', { length: 255 }),
   encrypted_gemini_key: text('encrypted_gemini_key'),
   gemini_key_iv: varchar('gemini_key_iv', { length: 24 }),
@@ -23,7 +25,7 @@ export const users = pgTable('users', {
 
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [uniqueIndex('users_email_lower_unique').on(sql.raw('lower("email")'))]);
 
 // ============================================================
 // TABLE: refresh_tokens

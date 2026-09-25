@@ -10,7 +10,6 @@ const contactSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255),
   email: z.string().email('Invalid email address').max(255),
   message: z.string().min(10, 'Message must be at least 10 characters').max(5000),
-  ai_screening_passed: z.boolean().optional().default(false),
 });
 
 router.post('/', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -21,7 +20,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction): Promis
       sender_name: parsed.name,
       sender_email: parsed.email,
       message: parsed.message,
-      ai_screening_passed: parsed.ai_screening_passed,
+      ai_screening_passed: false,
     });
 
     const resendApiKey = process.env.RESEND_API_KEY;
@@ -36,7 +35,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction): Promis
           from: sendingDomain,
           to: receiverEmail,
           subject: `[VaultLedger] New Contact Message from ${parsed.name}`,
-          html: `<p><strong>From:</strong> ${parsed.name} (${parsed.email})</p><p>${parsed.message}</p>`
+          text: `From: ${parsed.name} (${parsed.email})\n\n${parsed.message}`
         });
       } catch (emailErr) {
         console.error('[RESEND_DISPATCH_ERROR]', emailErr);

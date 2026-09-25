@@ -33,7 +33,7 @@ router.post(
         data: { user: result.user },
       });
     } catch (error: unknown) {
-      if (error instanceof Error && error.message.includes('ERR_AUTH_EMAIL_EXISTS')) {
+      if (error instanceof Error && (error.message.includes('ERR_AUTH_EMAIL_EXISTS') || error.message.includes('ERR_AUTH_EMAIL_RESERVED'))) {
         res.status(409).json({
           success: false,
           error: { code: 'ERR_AUTH_EMAIL_EXISTS', message: 'An account with this email already exists.' },

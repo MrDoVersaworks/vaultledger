@@ -151,6 +151,8 @@ jobs:
       CORS_ORIGIN: http://localhost:3002
       NEXT_PUBLIC_API_URL: http://localhost:5002
       NEXT_PUBLIC_BACKEND_URL: http://localhost:5002
+      E2E_ADMIN_EMAIL: admin@example.com
+      E2E_ADMIN_PASSWORD: password
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
@@ -167,6 +169,9 @@ jobs:
       - name: Run database migrations
         working-directory: ./backend
         run: npm run db:migrate
+      - name: Seed E2E administrator
+        working-directory: ./backend
+        run: npm run db:seed:e2e
       - name: Install frontend dependencies
         working-directory: ./frontend
         run: npm install

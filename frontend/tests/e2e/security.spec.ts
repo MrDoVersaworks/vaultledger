@@ -99,11 +99,22 @@ test('authenticated session lifecycle rotates refresh state and logout revokes i
   expect(login.status()).toBe(200);
   const loginBody = await login.json();
   const accessToken = loginBody.data.accessToken;
+  const beforeRotation = await request.storageState();
+  const oldRefreshCookie = beforeRotation.cookies.find((cookie) => cookie.name === 'vaultledger_refresh_token');
+  expect(oldRefreshCookie).toBeDefined();
 
   const refresh = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
     headers: { Origin: FRONTEND_URL },
   });
   expect(refresh.status()).toBe(200);
+
+  const reusedOldRefresh = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
+    headers: {
+      Origin: FRONTEND_URL,
+      Cookie: `vaultledger_refresh_token=${oldRefreshCookie?.value ?? ''}`,
+    },
+  });
+  expect(reusedOldRefresh.status()).toBe(401);
 
   const logout = await request.post(`${BACKEND_URL}/api/auth/logout`, {
     headers: { Origin: FRONTEND_URL },

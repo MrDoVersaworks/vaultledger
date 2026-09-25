@@ -2,11 +2,10 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { db } from '../db/connection.js';
 import { systemSettings, platformReviews } from '../db/schema.js';
 import { desc, eq } from 'drizzle-orm';
-import { apiRateLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
-router.get('/settings', apiRateLimiter, async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get('/settings', async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const [settings] = await db.select().from(systemSettings).limit(1);
     res.status(200).json({
@@ -21,7 +20,7 @@ router.get('/settings', apiRateLimiter, async (_req: Request, res: Response, nex
   }
 });
 
-router.get('/reviews', apiRateLimiter, async (_req: Request, res: Response): Promise<void> => {
+router.get('/reviews', async (_req: Request, res: Response): Promise<void> => {
   const reviews = await db
     .select()
     .from(platformReviews)
@@ -38,7 +37,7 @@ router.get('/reviews', apiRateLimiter, async (_req: Request, res: Response): Pro
   res.status(200).json({ success: true, data });
 });
 
-router.post('/reviews', apiRateLimiter, async (req: Request, res: Response): Promise<void> => {
+router.post('/reviews', async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, profession, rating, feedback } = req.body;
     const normalizedName = String(name ?? '').trim();

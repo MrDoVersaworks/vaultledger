@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-const BACKEND_URL = 'http://localhost:5002';
-const FRONTEND_URL = 'http://localhost:3002';
+const BACKEND_URL = process.env.PLAYWRIGHT_BACKEND_URL?.trim() || 'http://localhost:5002';
+const FRONTEND_URL = process.env.PLAYWRIGHT_BASE_URL?.trim() || 'http://localhost:3002';
 
 test.describe('VaultLedger — Admin & Management Controls', () => {
   /* ---- Admin UI Page Renders ---- */
@@ -43,6 +43,11 @@ test.describe('VaultLedger — Admin & Management Controls', () => {
 
   test('GET /admin/reviews rejects unauthenticated request', async ({ request }) => {
     const res = await request.get(`${BACKEND_URL}/api/admin/reviews`);
+    expect(res.status()).toBe(401);
+  });
+
+  test('PATCH /admin/reviews/:id/approve rejects unauthenticated request', async ({ request }) => {
+    const res = await request.patch(`${BACKEND_URL}/api/admin/reviews/fake-review-id/approve`);
     expect(res.status()).toBe(401);
   });
 

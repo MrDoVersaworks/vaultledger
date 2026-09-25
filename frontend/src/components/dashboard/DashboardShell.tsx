@@ -139,8 +139,8 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
 
           {/* Support Brief */}
           <div className="px-2 py-3 rounded-lg bg-[var(--bg-card)] border border-[var(--border-default)] text-center shadow-sm">
-            <p className="text-[10px] font-bold tracking-wider uppercase text-emerald-500">Sovereign Support</p>
-            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">Architected by Oyewole Favour</p>
+            <p className="text-[10px] font-bold tracking-wider uppercase text-emerald-500">Support</p>
+            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">VaultLedger support</p>
             <button 
               onClick={() => setContactOpen(true)}
               className="text-[10px] text-cyan-500 font-medium block hover:underline mt-1 mx-auto"
@@ -177,11 +177,11 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         {/* Top Header Placeholder spacing / responsive spacing */}
         <div className="h-[var(--header-height)] flex items-center justify-between px-6 pr-14 md:pr-6 border-b border-[var(--border-default)] bg-[var(--bg-card)]/95 backdrop-blur-sm sticky top-0 z-30">
           <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest hidden md:block">
-            Sovereign Ledger Panel
+            Workspace
           </div>
           <div className="text-xs font-bold text-[var(--accent-primary)] bg-[var(--bg-card-hover)] border border-[var(--border-default)] px-2.5 py-1 rounded-full flex items-center gap-1.5 ml-auto md:ml-0 shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-            <span>Vault Database Connected</span>
+            <span>Connected</span>
           </div>
         </div>
 

@@ -65,3 +65,10 @@ test('refresh and logout require a trusted browser origin', async ({ request }) 
   });
   expect(logout.status()).toBe(403);
 });
+
+
+test('landing page does not persist authentication credentials in localStorage', async ({ page }) => {
+  await page.goto('http://localhost:3002');
+  const keys = await page.evaluate(() => Object.keys(window.localStorage));
+  expect(keys.some((key) => /token|auth|refresh|access/i.test(key))).toBe(false);
+});

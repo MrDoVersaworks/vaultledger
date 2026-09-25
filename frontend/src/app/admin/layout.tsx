@@ -11,13 +11,13 @@ import { useAuth } from '@/hooks/useAuth';
  * This guard prevents the admin UI shell from being exposed to unauthenticated visitors.
  */
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
     if (!isLoading) {
-      if (!isAuthenticated) {
+      if (!isAuthenticated || user?.role !== 'admin') {
         router.replace('/');
       } else {
         setChecked(true);

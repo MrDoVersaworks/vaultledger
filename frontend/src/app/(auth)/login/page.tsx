@@ -51,7 +51,7 @@ export default function LoginPage() {
             VaultLedger
           </h1>
           <p className="text-[var(--text-secondary)] mt-2 text-sm">
-            Access your secure sovereign accounting vault
+            Sign in to your VaultLedger account
           </p>
         </div>
 
@@ -108,15 +108,15 @@ export default function LoginPage() {
               id="login-submit"
               className="w-full py-3 px-4 inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-white bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 disabled:opacity-50 disabled:pointer-events-none transition-all duration-200 shadow-sm"
             >
-              {isSubmitting ? 'Verifying vault...' : 'Enter Vault'}
+              {isSubmitting ? 'Signing in…' : 'Sign in'}
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
           <div className="mt-6 pt-6 border-t border-[var(--border-default)] text-center text-xs text-[var(--text-secondary)]">
-            Don&apos;t have a vault set up?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/register" className="text-[var(--accent-primary)] hover:text-[var(--accent-primary-hover)] font-semibold hover:underline">
-              Create your ledger
+              Create your account
             </Link>
           </div>
         </div>

@@ -88,6 +88,7 @@ router.post(
 // PUT /api/invoices/:id
 router.put(
   '/:id',
+  validate(uuidParamSchema, 'params'),
   validate(invoiceSchema),
   asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.userId!;
@@ -128,6 +129,7 @@ router.put(
 // PATCH /api/invoices/:id/status
 router.patch(
   '/:id/status',
+  validate(uuidParamSchema, 'params'),
   validate(uuidParamSchema, 'params'),
   validate(invoiceStatusSchema),
   asyncHandler(async (req: Request, res: Response): Promise<void> => {

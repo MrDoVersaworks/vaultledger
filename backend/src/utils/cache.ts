@@ -16,7 +16,7 @@ export const cacheMiddleware = (duration?: number) => {
     }
 
     // Construct a unique cache key based on the URL and user ID (if authenticated)
-    const userId = (req as any).user?.id || 'anonymous';
+    const userId = req.userId;\n    if (!userId) {\n      return next();\n    }
     const key = `__express__${req.originalUrl || req.url}__user__${userId}`;
     const cachedResponse = appCache.get(key);
 

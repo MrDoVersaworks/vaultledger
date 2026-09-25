@@ -24,6 +24,14 @@ interface InvoiceItemFormLine {
   unitPrice: number;
 }
 
+function toCents(value: number): number {
+  return Math.round(value * 100);
+}
+
+function formatCents(cents: number): string {
+  return (cents / 100).toFixed(2);
+}
+
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -66,7 +74,7 @@ export default function InvoicesPage() {
     setClientId('');
     // Auto-generate invoice number format (e.g. INV-2026-X)
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    setInvoiceNumber(`INV-2026-${randomSuffix}`);
+    setInvoiceNumber(`INV-${new Date().getFullYear()}-${randomSuffix}`);
     setDueDate('');
     setTaxRate(0);
     setNotes('');
@@ -94,9 +102,16 @@ export default function InvoicesPage() {
   }
 
   // Calculate Running Totals dynamically
-  const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unitPrice), 0);
-  const taxAmount = subtotal * (taxRate / 100);
-  const total = subtotal + taxAmount;
+  const subtotalCents = items.reduce(
+    (sum, item) => sum + Math.round((toCents(item.quantity) * toCents(item.unitPrice)) / 100),
+    0,
+  );
+  const taxRateCents = toCents(taxRate);
+  const taxAmountCents = Math.round((subtotalCents * taxRateCents) / 10000);
+  const totalCents = subtotalCents + taxAmountCents;
+  const subtotal = Number(formatCents(subtotalCents));
+  const taxAmount = Number(formatCents(taxAmountCents));
+  const total = Number(formatCents(totalCents));
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -178,7 +193,7 @@ export default function InvoicesPage() {
       {/* Title Header Area */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
             Invoice Registry
           </h1>
           <p className="text-[var(--text-secondary)] mt-1 text-sm">
@@ -189,7 +204,7 @@ export default function InvoicesPage() {
         <button
           onClick={openCreateModal}
           disabled={clients.length === 0}
-          className="btn-emerald px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-emerald-500/10 self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn-emerald px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
           id="btn-add-invoice"
         >
           <Plus size={14} className="stroke-[3]" />

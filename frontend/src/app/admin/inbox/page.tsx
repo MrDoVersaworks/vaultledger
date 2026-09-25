@@ -36,7 +36,7 @@ export default function AdminInboxPage() {
 
   const handleMarkAsRead = async (id: string, currentStatus: boolean) => {
     try {
-      await apiRequest({ method: 'PATCH', path: `/api/admin/inbox/${id}`, body: { isRead: !currentStatus } });
+      await apiRequest({ method: 'PATCH', path: `/api/admin/inbox/${id}/read` });
       setMessages((prev) =>
         prev.map((msg) => (msg.id === id ? { ...msg, isRead: !currentStatus } : msg))
       );
@@ -132,7 +132,7 @@ export default function AdminInboxPage() {
                         }`}
                     >
                       <CheckCircle className="w-4 h-4" />
-                      {msg.isRead ? 'Mark Unread' : 'Mark Read'}
+                      {msg.isRead ? 'Read' : 'Mark Read'}
                     </button>
                     <button
                       onClick={() => handleDelete(msg.id)}

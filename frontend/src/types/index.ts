@@ -37,6 +37,7 @@ export interface AuthUser {
   email: string;
   name: string;
   businessName: string | null;
+  role: string;
 }
 
 export interface LoginResponse {

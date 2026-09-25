@@ -1,10 +1,11 @@
-import { eq, and } from 'drizzle-orm';
+import { eq, and, inArray } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { invoices, invoiceItems, clients } from '../db/schema.js';
 import { ErrorCode } from '../constants/index.js';
 import { logger } from '../utils/logger.js';
 import { getClientById } from './client.service.js';
 import type { InvoiceResponse, InvoiceItemResponse } from '../types/index.js';
+import { parseDecimal, formatDecimal, lineTotalCents, taxCents } from '../utils/decimal.js';
 
 interface InvoiceItemInput {
   description: string;
@@ -30,6 +31,12 @@ interface UpdateInvoiceInput {
   notes?: string | null;
 }
 
+function normalizeDueDate(value: string | null | undefined): Date | null {
+  if (!value) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date(`${value}T12:00:00.000Z`);
+  return new Date(value);
+}
+
 function mapToInvoiceItemResponse(row: typeof invoiceItems.$inferSelect): InvoiceItemResponse {
   return {
     id: row.id,
@@ -52,28 +59,20 @@ export async function getInvoices(userId: string): Promise<InvoiceResponse[]> {
     .where(eq(invoices.user_id, userId));
 
   const invoiceIds = rows.map((r) => r.invoice.id);
-
-  let itemsRows: (typeof invoiceItems.$inferSelect)[] = [];
-  if (invoiceIds.length > 0) {
-    itemsRows = await db
-      .select()
-      .from(invoiceItems)
-      .where(
-        eq(invoiceItems.invoice_id, invoiceIds[0]) // default fallback if 1 item, or we fetch all if many using inArray
-      );
-
-    // Drizzle inArray or separate query per invoice. Let's do a fast query mapping for safety:
-    // To ensure perfect type safety and avoid complex inArray import failures:
+  const itemsRows = invoiceIds.length > 0
+    ? await db.select().from(invoiceItems).where(inArray(invoiceItems.invoice_id, invoiceIds))
+    : [];
+  const itemsByInvoice = new Map<string, (typeof invoiceItems.$inferSelect)[]>();
+  for (const item of itemsRows) {
+    const existing = itemsByInvoice.get(item.invoice_id) ?? [];
+    existing.push(item);
+    itemsByInvoice.set(item.invoice_id, existing);
   }
 
   const results: InvoiceResponse[] = [];
 
   for (const row of rows) {
-    const items = await db
-      .select()
-      .from(invoiceItems)
-      .where(eq(invoiceItems.invoice_id, row.invoice.id));
-
+    const items = itemsByInvoice.get(row.invoice.id) ?? [];
     results.push({
       id: row.invoice.id,
       userId: row.invoice.user_id,
@@ -160,21 +159,25 @@ export async function createInvoice(userId: string, input: CreateInvoiceInput): 
   await getClientById(userId, input.clientId);
 
   // Calculate totals
-  let subtotal = 0;
+  let subtotalCents = 0n;
   const calculatedItems = input.items.map((item) => {
-    const total = Number((item.quantity * item.unitPrice).toFixed(2));
-    subtotal += total;
+    const quantity = parseDecimal(item.quantity, 2);
+    const unitPrice = parseDecimal(item.unitPrice, 2);
+    if (quantity <= 0n || unitPrice < 0n) throw new Error('[ERR_VALIDATION] Invoice quantities and prices must be non-negative.');
+    const totalCents = lineTotalCents(quantity, unitPrice, 2);
+    subtotalCents += totalCents;
     return {
       description: item.description,
-      quantity: item.quantity.toFixed(2),
-      unitPrice: item.unitPrice.toFixed(2),
-      total: total.toFixed(2),
+      quantity: formatDecimal(quantity, 2),
+      unitPrice: formatDecimal(unitPrice, 2),
+      total: formatDecimal(totalCents, 2),
     };
   });
 
-  const taxRate = input.taxRate;
-  const taxAmount = Number((subtotal * (taxRate / 100)).toFixed(2));
-  const total = Number((subtotal + taxAmount).toFixed(2));
+  const taxRate = parseDecimal(input.taxRate, 2);
+  if (taxRate < 0n) throw new Error('[ERR_VALIDATION] Tax rate must be non-negative.');
+  const taxAmountCents = taxCents(subtotalCents, taxRate, 2);
+  const totalCents = subtotalCents + taxAmountCents;
 
   // Run in database transaction
   const result = await db.transaction(async (tx) => {
@@ -185,11 +188,11 @@ export async function createInvoice(userId: string, input: CreateInvoiceInput): 
         client_id: input.clientId,
         invoice_number: input.invoiceNumber,
         status: 'Draft',
-        subtotal: subtotal.toFixed(2),
-        tax_rate: taxRate.toFixed(2),
-        tax_amount: taxAmount.toFixed(2),
-        total: total.toFixed(2),
-        due_date: input.dueDate ? new Date(input.dueDate) : null,
+        subtotal: formatDecimal(subtotalCents, 2),
+        tax_rate: formatDecimal(taxRate, 2),
+        tax_amount: formatDecimal(taxAmountCents, 2),
+        total: formatDecimal(totalCents, 2),
+        due_date: normalizeDueDate(input.dueDate),
         notes: input.notes || null,
       })
       .returning();
@@ -233,47 +236,48 @@ export async function updateInvoice(
   // Perform inside database transaction
   const result = await db.transaction(async (tx) => {
     // If updating items, recalculate totals
-    let subtotal = Number(currentInvoice.subtotal);
-    let taxRate = Number(currentInvoice.taxRate);
+    let subtotalCents = parseDecimal(currentInvoice.subtotal, 2);
+    let taxRate = parseDecimal(currentInvoice.taxRate, 2);
 
     if (input.taxRate !== undefined) {
-      taxRate = input.taxRate;
+      taxRate = parseDecimal(input.taxRate, 2);
     }
 
     if (input.items) {
-      // Clear old items
       await tx.delete(invoiceItems).where(eq(invoiceItems.invoice_id, invoiceId));
 
-      subtotal = 0;
+      subtotalCents = 0n;
       const calculatedItems = input.items.map((item) => {
-        const total = Number((item.quantity * item.unitPrice).toFixed(2));
-        subtotal += total;
+        const quantity = parseDecimal(item.quantity, 2);
+        const unitPrice = parseDecimal(item.unitPrice, 2);
+        if (quantity <= 0n || unitPrice < 0n) throw new Error('[ERR_VALIDATION] Invoice quantities and prices must be non-negative.');
+        const totalCents = lineTotalCents(quantity, unitPrice, 2);
+        subtotalCents += totalCents;
         return {
           invoice_id: invoiceId,
           description: item.description,
-          quantity: item.quantity.toFixed(2),
-          unit_price: item.unitPrice.toFixed(2),
-          total: total.toFixed(2),
+          quantity: formatDecimal(quantity, 2),
+          unit_price: formatDecimal(unitPrice, 2),
+          total: formatDecimal(totalCents, 2),
         };
       });
 
-      // Insert new items
       await tx.insert(invoiceItems).values(calculatedItems);
     }
 
-    const taxAmount = Number((subtotal * (taxRate / 100)).toFixed(2));
-    const total = Number((subtotal + taxAmount).toFixed(2));
+    const taxAmountCents = taxCents(subtotalCents, taxRate, 2);
+    const totalCents = subtotalCents + taxAmountCents;
 
     const updatedInvoices = await tx
       .update(invoices)
       .set({
         client_id: input.clientId,
         invoice_number: input.invoiceNumber,
-        subtotal: subtotal.toFixed(2),
-        tax_rate: taxRate.toFixed(2),
-        tax_amount: taxAmount.toFixed(2),
-        total: total.toFixed(2),
-        due_date: input.dueDate !== undefined ? (input.dueDate ? new Date(input.dueDate) : null) : undefined,
+        subtotal: formatDecimal(subtotalCents, 2),
+        tax_rate: formatDecimal(taxRate, 2),
+        tax_amount: formatDecimal(taxAmountCents, 2),
+        total: formatDecimal(totalCents, 2),
+        due_date: input.dueDate !== undefined ? normalizeDueDate(input.dueDate) : undefined,
         notes: input.notes !== undefined ? input.notes : undefined,
         updated_at: new Date(),
       })

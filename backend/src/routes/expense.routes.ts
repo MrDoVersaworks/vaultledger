@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
-import { expenseSchema } from '../types/index.js';
+import { expenseSchema, uuidParamSchema } from '../types/index.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   getExpenses,
@@ -29,7 +29,7 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<void> 
 }));
 
 // GET /api/expenses/:id
-router.get('/:id', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.get('/:id', validate(uuidParamSchema, 'params'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId!;
   const expenseId = req.params.id;
 
@@ -88,6 +88,7 @@ router.post(
 // PUT /api/expenses/:id
 router.put(
   '/:id',
+  validate(uuidParamSchema, 'params'),
   validate(expenseSchema),
   asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.userId!;
@@ -116,7 +117,7 @@ router.put(
 );
 
 // DELETE /api/expenses/:id
-router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.delete('/:id', validate(uuidParamSchema, 'params'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId!;
   const expenseId = req.params.id;
 

@@ -1,47 +1,68 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { db } from '../db/connection.js';
-import { systemSettings } from '../db/schema.js';
+import { systemSettings, platformReviews } from '../db/schema.js';
+import { desc, eq } from 'drizzle-orm';
 
 const router = Router();
 
 router.get('/settings', async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const settingsArray = await db.select().from(systemSettings).limit(1);
-    const settings = settingsArray[0] || { google_analytics_id: '', termly_uuid: '' };
-    res.status(200).json({ success: true, data: settings });
+    const [settings] = await db.select().from(systemSettings).limit(1);
+    res.status(200).json({
+      success: true,
+      data: {
+        googleAnalyticsId: settings?.google_analytics_id ?? '',
+        termlyUuid: settings?.termly_uuid ?? '',
+      },
+    });
   } catch (error) {
     next(error);
   }
 });
 
 router.get('/reviews', async (_req: Request, res: Response): Promise<void> => {
-  try {
-    const { platformReviews } = await import('../db/schema.js');
-    const { desc } = await import('drizzle-orm');
-    const reviews = await db.select().from(platformReviews).orderBy(desc(platformReviews.created_at));
-    res.status(200).json({ success: true, data: reviews });
-  } catch (_err) {
-    res.status(200).json({ success: true, data: [] });
-  }
+  const reviews = await db
+    .select()
+    .from(platformReviews)
+    .where(eq(platformReviews.status, 'approved'))
+    .orderBy(desc(platformReviews.created_at));
+  const data = reviews.map((review) => ({
+    id: review.id,
+    name: review.name,
+    profession: review.profession,
+    rating: review.rating,
+    feedback: review.feedback,
+    createdAt: review.created_at,
+  }));
+  res.status(200).json({ success: true, data });
 });
 
 router.post('/reviews', async (req: Request, res: Response): Promise<void> => {
   try {
     const { name, profession, rating, feedback } = req.body;
-    if (!name || !feedback) {
-      res.status(400).json({ success: false, message: '[ERR_VALIDATION] Name and feedback are required.' });
+    const normalizedName = String(name ?? '').trim();
+    const normalizedFeedback = String(feedback ?? '').trim();
+    const normalizedRating = Number(rating);
+    if (!normalizedName || !normalizedFeedback || !Number.isInteger(normalizedRating) || normalizedRating < 1 || normalizedRating > 5 || normalizedName.length > 100 || normalizedFeedback.length > 2000) {
+      res.status(400).json({ success: false, message: '[ERR_VALIDATION] Invalid review fields.' });
       return;
     }
-    const { platformReviews } = await import('../db/schema.js');
+
     const [inserted] = await db.insert(platformReviews).values({
-      name: String(name).trim(),
-      profession: profession ? String(profession).trim() : 'Verified User',
-      rating: Number(rating) || 5,
-      feedback: String(feedback).trim(),
+      name: normalizedName,
+      profession: profession ? String(profession).trim().slice(0, 100) : 'User',
+      rating: normalizedRating,
+      feedback: normalizedFeedback,
+      status: 'pending',
     }).returning();
-    res.status(201).json({ success: true, data: inserted });
+
+    res.status(201).json({
+      success: true,
+      data: { id: inserted.id, status: inserted.status },
+      message: 'Review submitted for moderation.',
+    });
   } catch (_err) {
-    res.status(500).json({ success: false, message: '[ERR_REVIEW_POST_FAILED] Failed to post review.' });
+    res.status(500).json({ success: false, message: '[ERR_REVIEW_POST_FAILED] Failed to submit review.' });
   }
 });
 

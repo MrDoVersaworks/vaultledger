@@ -1,69 +1,17 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
-
-interface LegalDoc {
-  title: string;
-  content: string;
-  version: string;
-  updatedAt: string;
-}
-
 export default function PrivacyPolicyPage() {
-  const [doc, setDoc] = useState<LegalDoc | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchPrivacyPolicy() {
-      try {
-        const res = await fetch(`${BACKEND_URL}/api/v1/public/legal/privacy_policy`);
-        if (res.ok) {
-          const json = await res.json();
-          if (json.success && json.data) {
-            setDoc(json.data);
-          }
-        }
-      } catch (_err) {
-        // Fallback silently if offline or API unavailable
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchPrivacyPolicy();
-  }, []);
-
   return (
-    <div className="min-h-screen bg-[#04071a] text-[#94a3b8] p-8 pt-24">
-      <div className="max-w-4xl mx-auto py-12 space-y-8">
-        <h1 className="text-4xl font-bold mb-8 text-white">
-          {doc ? doc.title : 'Privacy Policy'}
-        </h1>
-        <p className="text-sm text-[#64748b]">
-          Version: {doc ? doc.version : '1.0.0'} &bull; Last updated: {doc ? new Date(doc.updatedAt).toLocaleDateString() : 'July 2026'}
-        </p>
+    <main className="min-h-screen bg-[var(--bg-primary)] px-5 pb-16 pt-24 text-[var(--text-secondary)] sm:px-8">
+      <article className="mx-auto max-w-3xl rounded-2xl border border-[var(--border-default)] bg-[var(--bg-secondary)] p-6 shadow-[var(--shadow-sm)] sm:p-10">
+        <p className="text-sm font-medium text-[var(--accent-primary)]">VaultLedger</p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[var(--text-primary)] sm:text-4xl">Privacy Policy</h1>
+        <p className="mt-3 text-sm text-[var(--text-muted)]">Version 1.0.0 · Last updated July 2026</p>
 
-        {loading ? (
-          <div className="text-center py-12 text-slate-500">Loading document...</div>
-        ) : doc ? (
-          <div
-            className="prose prose-invert max-w-none space-y-4"
-            dangerouslySetInnerHTML={{ __html: doc.content }}
-          />
-        ) : (
-          <div className="space-y-6">
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-white">1. Information We Collect</h2>
-              <p>When you use VaultLedger, we collect financial data, invoices, and client information provided by you.</p>
-            </section>
-            <section className="space-y-4">
-              <h2 className="text-2xl font-semibold text-white">2. Data Security</h2>
-              <p>All sensitive credentials and financial data are encrypted using AES-256-GCM before storage.</p>
-            </section>
-          </div>
-        )}
-      </div>
-    </div>
+        <div className="mt-10 space-y-8 text-sm leading-7">
+          <section><h2 className="text-lg font-semibold text-[var(--text-primary)]">1. Information We Collect</h2><p className="mt-2">VaultLedger stores information you provide to operate your account, including profile details, clients, invoices, expenses, and settings.</p></section>
+          <section><h2 className="text-lg font-semibold text-[var(--text-primary)]">2. Data Security</h2><p className="mt-2">Sensitive credentials configured for supported AI integrations are encrypted before storage. Access to account data is scoped to the authenticated account.</p></section>
+          <section><h2 className="text-lg font-semibold text-[var(--text-primary)]">3. Contact Messages</h2><p className="mt-2">Messages submitted through the public contact form are stored for support and administrative follow-up.</p></section>
+        </div>
+      </article>
+    </main>
   );
 }

@@ -6,6 +6,13 @@ export const DEFAULT_LIMIT = 10;
 export const MAX_LIMIT = 100;
 
 // ============================================================
+// MONEY
+// ============================================================
+// VaultLedger currently operates in one application currency: USD.
+// Multi-currency aggregation is intentionally not supported.
+export const APPLICATION_CURRENCY_CODE = 'USD';
+
+// ============================================================
 // AUTH
 // ============================================================
 export const ACCESS_TOKEN_EXPIRY = '15m';

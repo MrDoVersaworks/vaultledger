@@ -1,25 +1,15 @@
-import { API_BASE_URL, ACCESS_TOKEN_KEY } from '@/constants/index';
+import { API_BASE_URL } from '@/constants/index';
 import type { ApiResponse } from '@/types/index';
 
 let accessToken: string | null = null;
 
-// On initial boot, attempt to restore access token from local storage (if running in browser)
-if (typeof window !== 'undefined') {
-  accessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
-}
 
 export function setAccessToken(token: string): void {
   accessToken = token;
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(ACCESS_TOKEN_KEY, token);
-  }
 }
 
 export function clearAccessToken(): void {
   accessToken = null;
-  if (typeof window !== 'undefined') {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-  }
 }
 
 export function getAccessToken(): string | null {
@@ -58,6 +48,9 @@ async function refreshToken(): Promise<string> {
 
 export async function apiRequest<T>(options: RequestOptions): Promise<T> {
   const { method, path, body, requiresAuth = true } = options;
+  if (!API_BASE_URL) {
+    throw new Error('[ERR_CONFIG_API_BASE_URL] NEXT_PUBLIC_API_URL is required in production.');
+  }
 
   const headers: Record<string, string> = {};
 

@@ -1,4 +1,5 @@
-import { pgTable, uuid, varchar, text, timestamp, boolean, numeric, integer } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, timestamp, boolean, numeric, integer, uniqueIndex, index } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { relations } from 'drizzle-orm';
 
 // ============================================================
@@ -9,6 +10,7 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 255 }).notNull().unique(),
   password_hash: varchar('password_hash', { length: 255 }).notNull(),
   name: varchar('name', { length: 100 }).notNull(),
+  role: varchar('role', { length: 20 }).notNull().default('user'),
   business_name: varchar('business_name', { length: 255 }),
   encrypted_gemini_key: text('encrypted_gemini_key'),
   gemini_key_iv: varchar('gemini_key_iv', { length: 24 }),
@@ -23,7 +25,7 @@ export const users = pgTable('users', {
 
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [uniqueIndex('users_email_lower_unique').on(sql.raw('lower("email")'))]);
 
 // ============================================================
 // TABLE: refresh_tokens
@@ -68,7 +70,7 @@ export const invoices = pgTable('invoices', {
   notes: text('notes'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [uniqueIndex('invoices_user_invoice_number_unique').on(table.user_id, table.invoice_number)]);
 
 // ============================================================
 // TABLE: invoice_items
@@ -131,9 +133,27 @@ export const platformReviews = pgTable('platform_reviews', {
   profession: varchar('profession', { length: 255 }),
   rating: integer('rating').notNull().default(5),
   feedback: text('feedback').notNull(),
+  status: varchar('status', { length: 20 }).notNull().default('pending'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ============================================================
+// TABLE: rate_limit_buckets
+// ============================================================
+export const rateLimitBuckets = pgTable('rate_limit_buckets', {
+  key: varchar('key', { length: 512 }).primaryKey(),
+  hits: integer('hits').notNull().default(0),
+  reset_at: timestamp('reset_at', { withTimezone: true }).notNull(),
+}, (table) => [index('rate_limit_reset_idx').on(table.reset_at)]);
+
+// ============================================================
+// TABLE: revoked_access_tokens
+// ============================================================
+export const revokedAccessTokens = pgTable('revoked_access_tokens', {
+  signature: varchar('signature', { length: 512 }).primaryKey(),
+  expires_at: timestamp('expires_at', { withTimezone: true }).notNull(),
+}, (table) => [index('revoked_access_tokens_expires_idx').on(table.expires_at)]);
 
 // ============================================================
 // RELATIONS

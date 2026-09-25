@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-const BACKEND_URL = 'http://localhost:5002';
+const BACKEND_URL = process.env.PLAYWRIGHT_BACKEND_URL?.trim() || 'http://localhost:5002';
+const FRONTEND_URL = process.env.PLAYWRIGHT_BASE_URL?.trim() || 'http://localhost:3002';
 
 test.describe('VaultLedger — Security & Data Protection (SIL Rules)', () => {
   /* ---- User Scoping & Unauthorized Access (SIL-3) ---- */
@@ -29,6 +30,19 @@ test.describe('VaultLedger — Security & Data Protection (SIL Rules)', () => {
     expect(res.status()).toBe(401);
   });
 
+
+  test('resource endpoints reject malformed UUID identifiers', async ({ request }) => {
+    const endpoints = [
+      '/api/clients/not-a-uuid',
+      '/api/invoices/not-a-uuid',
+      '/api/expenses/not-a-uuid',
+    ];
+    for (const endpoint of endpoints) {
+      const res = await request.get(BACKEND_URL + endpoint);
+      expect(res.status()).toBe(400);
+    }
+  });
+
   /* ---- Error Format Standardizing (SIL-23) ---- */
   test('error responses format with capitalized sentence structure', async ({ request }) => {
     const res = await request.post(`${BACKEND_URL}/api/auth/login`, {
@@ -51,4 +65,69 @@ test.describe('VaultLedger — Security & Data Protection (SIL Rules)', () => {
     const allowOrigin = res.headers()['access-control-allow-origin'];
     expect(allowOrigin).not.toBe('*');
   });
+});
+
+
+test('refresh and logout require a trusted browser origin', async ({ request }) => {
+  const refresh = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
+    headers: { Origin: 'https://unauthorized-domain.com' },
+  });
+  expect(refresh.status()).toBe(403);
+
+  const logout = await request.post(`${BACKEND_URL}/api/auth/logout`, {
+    headers: { Origin: 'https://unauthorized-domain.com' },
+  });
+  expect(logout.status()).toBe(403);
+});
+
+
+test('landing page does not persist authentication credentials in localStorage', async ({ page }) => {
+  await page.goto(FRONTEND_URL);
+  const keys = await page.evaluate(() => Object.keys(window.localStorage));
+  expect(keys.some((key) => /token|auth|refresh|access/i.test(key))).toBe(false);
+});
+
+
+test('authenticated session lifecycle rotates refresh state and logout revokes it', async ({ request }) => {
+  const email = process.env.E2E_ADMIN_EMAIL;
+  const password = process.env.E2E_ADMIN_PASSWORD;
+  test.skip(!email || !password, 'E2E administrator credentials are not configured');
+
+  const login = await request.post(`${BACKEND_URL}/api/auth/login`, {
+    data: { email, password },
+  });
+  expect(login.status()).toBe(200);
+  const loginBody = await login.json();
+  const accessToken = loginBody.data.accessToken;
+  const beforeRotation = await request.storageState();
+  const oldRefreshCookie = beforeRotation.cookies.find((cookie) => cookie.name === 'vaultledger_refresh_token');
+  expect(oldRefreshCookie).toBeDefined();
+
+  const refresh = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
+    headers: { Origin: FRONTEND_URL },
+  });
+  expect(refresh.status()).toBe(200);
+
+  const reusedOldRefresh = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
+    headers: {
+      Origin: FRONTEND_URL,
+      Cookie: `vaultledger_refresh_token=${oldRefreshCookie?.value ?? ''}`,
+    },
+  });
+  expect(reusedOldRefresh.status()).toBe(401);
+
+  const logout = await request.post(`${BACKEND_URL}/api/auth/logout`, {
+    headers: { Origin: FRONTEND_URL },
+  });
+  expect(logout.status()).toBe(200);
+
+  const revokedAccess = await request.get(`${BACKEND_URL}/api/clients`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  expect(revokedAccess.status()).toBe(401);
+
+  const afterLogout = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
+    headers: { Origin: FRONTEND_URL },
+  });
+  expect(afterLogout.status()).toBe(401);
 });

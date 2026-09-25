@@ -6,6 +6,7 @@ import { logger } from '../utils/logger.js';
 import { getDecryptedApiKey, getUserModel } from './settings.service.js';
 import { categorizeExpense } from './ai.service.js';
 import type { ExpenseResponse } from '../types/index.js';
+import { parseDecimal, formatDecimal } from '../utils/decimal.js';
 
 interface CreateExpenseInput {
   description: string;
@@ -63,7 +64,7 @@ export async function createExpense(userId: string, input: CreateExpenseInput): 
     .values({
       user_id: userId,
       description: input.description,
-      amount: input.amount.toFixed(2),
+      amount: formatDecimal(parseDecimal(input.amount, 2), 2),
       date: new Date(input.date),
       category: input.category || 'Other',
       ai_categorized: false,
@@ -87,7 +88,7 @@ export async function createExpenseAI(userId: string, input: CreateExpenseInput)
     const model = await getUserModel(userId);
 
     logger.info('EXPENSE', `Running AI auto-categorization for expense: "${input.description}"`);
-    const aiCategory = await categorizeExpense(apiKey, model, input.description, input.amount.toFixed(2));
+    const aiCategory = await categorizeExpense(apiKey, model, input.description, formatDecimal(parseDecimal(input.amount, 2), 2));
     
     category = aiCategory;
     aiCategorized = true;
@@ -102,7 +103,7 @@ export async function createExpenseAI(userId: string, input: CreateExpenseInput)
     .values({
       user_id: userId,
       description: input.description,
-      amount: input.amount.toFixed(2),
+      amount: formatDecimal(parseDecimal(input.amount, 2), 2),
       date: new Date(input.date),
       category,
       ai_categorized: aiCategorized,
@@ -129,7 +130,7 @@ export async function updateExpense(
     .update(expenses)
     .set({
       description: input.description,
-      amount: input.amount !== undefined ? input.amount.toFixed(2) : undefined,
+      amount: input.amount !== undefined ? formatDecimal(parseDecimal(input.amount, 2), 2) : undefined,
       date: input.date ? new Date(input.date) : undefined,
       category: input.category !== undefined ? (input.category || 'Other') : undefined,
       ai_categorized: input.category !== undefined ? false : undefined, // If user manually overrides, clear AI flag

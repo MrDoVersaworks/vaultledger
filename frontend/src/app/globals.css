@@ -1,79 +1,71 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================================
-   DESIGN TOKENS (Premium Emerald & Deep Slate Theme)
-   ============================================================ */
 :root, [data-theme='dark'] {
-  /* Colors — Dark Theme */
-  --bg-primary: #080a10;
-  --bg-secondary: #0f131e;
-  --bg-tertiary: #171d2e;
-  --bg-card: #121826;
-  --bg-card-hover: #1b2336;
-  --bg-input: #0b0e16;
-  --bg-overlay: rgba(0, 0, 0, 0.7);
+  --bg-primary: #0b0b0d;
+  --bg-secondary: #151517;
+  --bg-tertiary: #1c1c1e;
+  --bg-card: #171719;
+  --bg-card-hover: #202023;
+  --bg-input: #111113;
+  --bg-overlay: rgba(0, 0, 0, 0.55);
 
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-inverse: #080a10;
+  --text-primary: #f5f5f7;
+  --text-secondary: #a1a1a6;
+  --text-muted: #6e6e73;
+  --text-inverse: #0b0b0d;
 
-  --accent-primary: #10b981; /* Emerald */
-  --accent-primary-hover: #059669;
-  --accent-secondary: #06b6d4; /* Cyan */
-  --accent-gradient: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-  --accent-glow: 0 0 20px rgba(16, 185, 129, 0.25);
+  --accent-primary: #0a84ff;
+  --accent-primary-hover: #0077ed;
+  --accent-secondary: #64d2ff;
+  --accent-gradient: none;
+  --accent-glow: 0 1px 2px rgba(0, 0, 0, 0.18);
 
-  --border-default: #1e293b;
-  --border-hover: #334155;
-  --border-focus: #10b981;
+  --border-default: #2c2c2e;
+  --border-hover: #48484a;
+  --border-focus: #0a84ff;
 
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
+  --success: #30d158;
+  --warning: #ff9f0a;
+  --error: #ff453a;
+  --info: #64d2ff;
 }
 
 [data-theme='light'] {
-  /* Colors — Light Theme */
-  --bg-primary: #f8fafc;
+  --bg-primary: #f5f5f7;
   --bg-secondary: #ffffff;
-  --bg-tertiary: #f1f5f9;
+  --bg-tertiary: #e5e5ea;
   --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
+  --bg-card-hover: #f2f2f7;
   --bg-input: #ffffff;
-  --bg-overlay: rgba(0, 0, 0, 0.4);
+  --bg-overlay: rgba(0, 0, 0, 0.35);
 
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #64748b;
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-muted: #86868b;
   --text-inverse: #ffffff;
 
-  --accent-primary: #10b981;
-  --accent-primary-hover: #0f766e;
-  --accent-secondary: #06b6d4;
-  --accent-gradient: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-  --accent-glow: 0 0 20px rgba(16, 185, 129, 0.15);
+  --accent-primary: #007aff;
+  --accent-primary-hover: #006ee6;
+  --accent-secondary: #5ac8fa;
+  --accent-gradient: none;
+  --accent-glow: 0 1px 2px rgba(0, 0, 0, 0.08);
 
-  --border-default: #e2e8f0;
-  --border-hover: #cbd5e1;
-  --border-focus: #10b981;
+  --border-default: #d2d2d7;
+  --border-hover: #b8b8bd;
+  --border-focus: #007aff;
 
-  --success: #10b981;
-  --warning: #d97706;
-  --error: #dc2626;
-  --info: #2563eb;
+  --success: #34c759;
+  --warning: #ff9500;
+  --error: #ff3b30;
+  --info: #5ac8fa;
 }
 
 :root {
-  /* Typography */
-  --font-sans: 'Plus Jakarta Sans', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: 'Outfit', sans-serif;
-  
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+
   --font-xs: 0.75rem;
   --font-sm: 0.875rem;
   --font-base: 1rem;
@@ -84,7 +76,6 @@
   --font-4xl: 2.25rem;
   --font-5xl: 3rem;
 
-  /* Spacing */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -92,91 +83,89 @@
   --space-xl: 2rem;
   --space-2xl: 3rem;
 
-  /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
+  --radius-sm: 7px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
   --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-glow: 0 0 15px rgba(16, 185, 129, 0.15);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 18px 45px rgba(0, 0, 0, 0.12);
+  --shadow-glow: none;
 
-  /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 150ms ease;
+  --transition-base: 220ms ease;
+  --transition-slow: 320ms ease;
 
-  /* Layout */
-  --header-height: 72px;
-  --sidebar-width: 280px;
+  --header-height: 68px;
+  --sidebar-width: 248px;
   --max-content-width: 1400px;
 }
 
-/* ============================================================
-   RESET & BASE
-   ============================================================ */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg-primary);
+}
+
 body {
+  margin: 0;
   font-family: var(--font-sans);
-  background-color: var(--bg-primary);
+  background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
   overflow-x: hidden;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
-/* ============================================================
-   CUSTOM PREMIUM COMPONENTS
-   ============================================================ */
-/* Glassmorphism Cards */
+button, input, textarea, select {
+  font: inherit;
+}
+
 .glass-card {
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-default);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
   border-radius: var(--radius-lg);
-  transition: all var(--transition-base);
+  transition: border-color var(--transition-base), background-color var(--transition-base);
 }
 
 .glass-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(16, 185, 129, 0.15);
-  box-shadow: 0 12px 40px 0 rgba(16, 185, 129, 0.05);
+  border-color: var(--border-hover);
 }
 
-/* Premium Buttons */
 .btn-emerald {
-  background: var(--accent-gradient);
-  color: #080a10;
-  font-weight: 700;
-  box-shadow: var(--accent-glow);
-  transition: all var(--transition-fast);
+  background: var(--accent-primary);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--transition-fast);
   border-radius: var(--radius-md);
 }
 
 .btn-emerald:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+  background: var(--accent-primary-hover);
 }
 
 .btn-emerald:active:not(:disabled) {
-  transform: translateY(0);
+  transform: translateY(1px);
 }
 
-/* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
@@ -192,19 +181,22 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--border-hover);
 }
 
-/* Animations */
-@keyframes glow-pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.6)); }
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
 }
 
-.glow-glow {
-  animation: glow-pulse 3s infinite ease-in-out;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-/* Hide Next.js Dev indicators */
-next-route-announcer, 
-#__next-build-watcher, 
+next-route-announcer,
+#__next-build-watcher,
 [data-nextjs-toast-wrapper],
 .nextjs-static-indicator {
   display: none !important;

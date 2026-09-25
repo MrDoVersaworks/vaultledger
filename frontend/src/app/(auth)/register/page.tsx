@@ -39,7 +39,7 @@ export default function RegisterPage() {
 
     try {
       await register(email, password, name, businessName || undefined);
-      toast.success('Your VaultLedger has been initialized successfully!');
+      toast.success('Your account has been created successfully!');
       router.push('/dashboard');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Registration failed. Please try again.';
@@ -50,27 +50,23 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#080a10] px-4 relative overflow-hidden py-12">
-      {/* Background Glow effects */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-500/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-cyan-500/10 blur-[120px] pointer-events-none" />
-
-      <div className="w-full max-w-md z-10">
+    <main className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)] px-4 relative overflow-hidden py-12">
+      <div className="w-full max-w-md">
         {/* Brand logo & header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-500 mb-4 shadow-lg shadow-emerald-500/10">
-            <Lock className="w-6 h-6 text-slate-950" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[var(--accent-primary)] border border-white/10 mb-4 shadow-sm">
+            <Lock className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-            Initialize Ledger
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">
+            Create your account
           </h1>
-          <p className="text-slate-400 mt-2 text-sm">
-            Configure your secure corporate accounting chamber
+          <p className="text-[var(--text-secondary)] mt-2 text-sm">
+            Set up your VaultLedger account
           </p>
         </div>
 
         {/* Auth form card */}
-        <div className="bg-slate-950/80 border border-slate-900 rounded-3xl p-8 backdrop-blur-xl shadow-2xl relative">
+        <div className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-2xl p-6 sm:p-8 shadow-[var(--shadow-md)] relative">
           <form className="space-y-5" onSubmit={handleSubmit} id="register-form">
             {error && (
               <div className="p-3 text-xs font-semibold rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
@@ -79,7 +75,7 @@ export default function RegisterPage() {
             )}
 
             <div className="space-y-1.5">
-              <label htmlFor="register-name" className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <label htmlFor="register-name" className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
                 Full Name
               </label>
               <div className="relative">
@@ -90,14 +86,14 @@ export default function RegisterPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Oyewole Favour"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-800 focus:border-emerald-500 rounded-xl text-sm placeholder-slate-600 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200 outline-none text-slate-200"
+                  className="w-full pl-10 pr-4 py-3 bg-[var(--bg-input)] border border-[var(--border-default)] focus:border-[var(--border-focus)] rounded-xl text-sm placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--border-focus)]/20 transition-all duration-200 outline-none text-[var(--text-primary)]"
                 />
                 <User className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="register-email" className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <label htmlFor="register-email" className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
                 Email Address
               </label>
               <div className="relative">
@@ -109,15 +105,15 @@ export default function RegisterPage() {
                   placeholder="favour@company.com"
                   required
                   autoComplete="email"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-800 focus:border-emerald-500 rounded-xl text-sm placeholder-slate-600 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200 outline-none text-slate-200"
+                  className="w-full pl-10 pr-4 py-3 bg-[var(--bg-input)] border border-[var(--border-default)] focus:border-[var(--border-focus)] rounded-xl text-sm placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--border-focus)]/20 transition-all duration-200 outline-none text-[var(--text-primary)]"
                 />
                 <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="register-business" className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Business Name <span className="text-slate-600">(Optional)</span>
+              <label htmlFor="register-business" className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                Business Name <span className="text-[var(--text-muted)]">(Optional)</span>
               </label>
               <div className="relative">
                 <input
@@ -126,14 +122,14 @@ export default function RegisterPage() {
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder="Oyewole Holdings Inc."
-                  className="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-800 focus:border-emerald-500 rounded-xl text-sm placeholder-slate-600 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200 outline-none text-slate-200"
+                  className="w-full pl-10 pr-4 py-3 bg-[var(--bg-input)] border border-[var(--border-default)] focus:border-[var(--border-focus)] rounded-xl text-sm placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--border-focus)]/20 transition-all duration-200 outline-none text-[var(--text-primary)]"
                 />
                 <Briefcase className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="register-password" className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <label htmlFor="register-password" className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)]">
                 Password
               </label>
               <div className="relative">
@@ -145,23 +141,23 @@ export default function RegisterPage() {
                   placeholder="••••••••"
                   required
                   autoComplete="new-password"
-                  className="w-full pl-10 pr-4 py-3 bg-slate-900/60 border border-slate-800 focus:border-emerald-500 rounded-xl text-sm placeholder-slate-600 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200 outline-none text-slate-200"
+                  className="w-full pl-10 pr-4 py-3 bg-[var(--bg-input)] border border-[var(--border-default)] focus:border-[var(--border-focus)] rounded-xl text-sm placeholder-[var(--text-muted)] focus:ring-2 focus:ring-[var(--border-focus)]/20 transition-all duration-200 outline-none text-[var(--text-primary)]"
                 />
                 <KeyRound className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500" />
               </div>
             </div>
 
             {/* Terms & Conditions Agreement Section */}
-            <div className="p-4 bg-slate-900/80 border border-slate-800 rounded-2xl space-y-3">
+            <div className="p-4 bg-[var(--bg-input)] border border-[var(--border-default)] rounded-2xl space-y-3">
               <div className="flex items-start gap-3">
                 <input
                   id="terms-checkbox-vl"
                   type="checkbox"
                   checked={termsAgreed}
                   onChange={(e) => setTermsAgreed(e.target.checked)}
-                  className="mt-1 w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-slate-950 cursor-pointer"
+                  className="mt-1 w-4 h-4 rounded border-slate-700 text-emerald-500 focus:ring-emerald-500 bg-[var(--bg-primary)] cursor-pointer"
                 />
-                <label htmlFor="terms-checkbox-vl" className="text-xs text-slate-400 leading-relaxed cursor-pointer select-none">
+                <label htmlFor="terms-checkbox-vl" className="text-xs text-[var(--text-secondary)] leading-relaxed cursor-pointer select-none">
                   I have read and agree to the{' '}
                   <Link href="/terms" target="_blank" className="text-emerald-400 underline hover:text-emerald-300 font-medium">
                     Terms of Service
@@ -173,14 +169,14 @@ export default function RegisterPage() {
                 </label>
               </div>
 
-              <div className="flex gap-2 pt-1 border-t border-slate-800 text-[11px]">
+              <div className="flex gap-2 pt-1 border-t border-[var(--border-default)] text-[11px]">
                 <button
                   type="button"
                   onClick={() => setTermsAgreed(true)}
                   className={`flex-1 py-1.5 px-2 rounded-lg font-semibold transition-all ${
                     termsAgreed
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                      : 'bg-slate-800 text-[var(--text-secondary)] hover:bg-slate-700'
                   }`}
                 >
                   {termsAgreed ? '✓ Terms Agreed' : 'I Agree'}
@@ -191,7 +187,7 @@ export default function RegisterPage() {
                   className={`flex-1 py-1.5 px-2 rounded-lg font-semibold transition-all ${
                     !termsAgreed
                       ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
-                      : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                      : 'bg-slate-800 text-[var(--text-secondary)] hover:bg-slate-700'
                   }`}
                 >
                   Decline
@@ -203,7 +199,7 @@ export default function RegisterPage() {
               type="submit"
               disabled={isSubmitting || !termsAgreed}
               id="register-submit"
-              className={`w-full py-3 px-4 inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-cyan-400 hover:from-emerald-500 hover:to-cyan-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 shadow-lg shadow-emerald-500/10 ${
+              className={`w-full py-3 px-4 inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold text-white bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all duration-200 shadow-lg shadow-emerald-500/10 ${
                 !termsAgreed ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.01]'
               }`}
             >
@@ -212,9 +208,9 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-900 text-center text-xs text-slate-400">
+          <div className="mt-6 pt-6 border-t border-[var(--border-default)] text-center text-xs text-[var(--text-secondary)]">
             Already have a vault?{' '}
-            <Link href="/login" className="text-emerald-400 hover:text-emerald-300 font-semibold hover:underline">
+            <Link href="/login" className="text-[var(--accent-primary)] hover:text-[var(--accent-primary-hover)] font-semibold hover:underline">
               Enter here
             </Link>
           </div>

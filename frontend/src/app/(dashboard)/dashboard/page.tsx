@@ -17,6 +17,15 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+function formatMoney(value: string | number): string {
+  const cents = Math.round(Number(value) * 100);
+  const sign = cents < 0 ? '-' : '';
+  const absolute = Math.abs(cents);
+  const whole = Math.floor(absolute / 100);
+  const fraction = String(absolute % 100).padStart(2, '0');
+  return sign + whole.toLocaleString('en-US') + '.' + fraction;
+}
+
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [trend, setTrend] = useState<MonthlyDashboardData[]>([]);
@@ -48,9 +57,9 @@ export default function DashboardPage() {
     loadDashboardData();
   }, []);
 
-  const totalRevenueNum = Number(summary?.totalRevenue || 0);
-  const totalExpensesNum = Number(summary?.totalExpenses || 0);
-  const profit = totalRevenueNum - totalExpensesNum;
+  const totalRevenueCents = Math.round(Number(summary?.totalRevenue || 0) * 100);
+  const totalExpensesCents = Math.round(Number(summary?.totalExpenses || 0) * 100);
+  const profitCents = totalRevenueCents - totalExpensesCents;
 
   if (isLoading) {
     return (
@@ -66,11 +75,11 @@ export default function DashboardPage() {
       {/* Upper Title Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-            Financial Cockpit
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">
+            Dashboard
           </h1>
           <p className="text-[var(--text-secondary)] mt-1 text-sm">
-            Overview of your active business accounting flows and cash balances
+            Overview of your invoices, expenses, and receivables
           </p>
         </div>
 
@@ -104,7 +113,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="text-2xl font-black mt-4 text-[var(--text-primary)]">
-            ${totalRevenueNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${formatMoney(summary?.totalRevenue || '0.00')}
           </div>
           <div className="text-[11px] text-emerald-500 font-semibold mt-1 flex items-center gap-0.5">
             <span>{summary?.paidInvoicesCount || 0} paid invoices logged</span>
@@ -113,7 +122,6 @@ export default function DashboardPage() {
 
         {/* Total Expenses Card */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-default)] p-6 rounded-2xl flex flex-col relative overflow-hidden backdrop-blur-md shadow-sm">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-bl-full pointer-events-none" />
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Expenses</span>
             <div className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/10 flex items-center justify-center text-rose-500">
@@ -121,7 +129,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="text-2xl font-black mt-4 text-[var(--text-primary)]">
-            ${totalExpensesNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${formatMoney(summary?.totalExpenses || '0.00')}
           </div>
           <div className="text-[11px] text-[var(--text-secondary)] font-semibold mt-1 flex items-center gap-0.5">
             <span>Operating outgoing costs</span>
@@ -130,7 +138,6 @@ export default function DashboardPage() {
 
         {/* Outstanding Card */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-default)] p-6 rounded-2xl flex flex-col relative overflow-hidden backdrop-blur-md shadow-sm">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-bl-full pointer-events-none" />
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Outstanding Receivables</span>
             <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/10 flex items-center justify-center text-amber-500">
@@ -138,7 +145,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="text-2xl font-black mt-4 text-[var(--text-primary)]">
-            ${Number(summary?.outstanding || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${formatMoney(summary?.outstanding || '0.00')}
           </div>
           <div className="text-[11px] text-amber-500 font-semibold mt-1">
             {summary?.draftInvoicesCount || 0} drafts awaiting completion
@@ -147,15 +154,14 @@ export default function DashboardPage() {
 
         {/* Net Profit Card */}
         <div className="bg-[var(--bg-card)] border border-[var(--border-default)] p-6 rounded-2xl flex flex-col relative overflow-hidden backdrop-blur-md shadow-sm">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-bl-full pointer-events-none" />
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">Net Balances</span>
             <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/10 flex items-center justify-center text-cyan-500">
               <TrendingUp size={16} />
             </div>
           </div>
-          <div className={`text-2xl font-black mt-4 ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-            ${profit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <div className={`text-2xl font-black mt-4 ${profitCents >= 0n ? 'text-emerald-500' : 'text-rose-500'}`}>
+            ${formatMoney(profitCents / 100)}
           </div>
           <div className="text-[11px] text-[var(--text-secondary)] font-semibold mt-1">
             Realized cash flow margin

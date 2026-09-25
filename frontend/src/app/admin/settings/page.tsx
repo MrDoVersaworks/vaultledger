@@ -45,28 +45,28 @@ export default function AdminSettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#05050a]">
+      <div className="flex h-screen items-center justify-center bg-[var(--bg-primary)]">
         <div className="w-8 h-8 border-4 border-[#6c5ce7] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  const inputClass = "w-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] rounded-lg p-2.5 text-white focus:border-[#6c5ce7] focus:ring-1 focus:ring-[#6c5ce7] outline-none transition-colors";
-  const labelClass = "block text-sm font-medium text-[#8a99ad] mb-1.5";
+  const inputClass = "w-full bg-[var(--bg-input)] border border-[var(--border-default)] rounded-lg p-2.5 text-[var(--text-primary)] focus:border-[var(--border-focus)] focus:ring-1 focus:ring-[var(--border-focus)] outline-none transition-colors";
+  const labelClass = "block text-sm font-medium text-[var(--text-secondary)] mb-1.5";
 
   return (
-    <div className="min-h-screen bg-[#05050a] text-white p-4 md:p-8">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] p-4 md:p-8">
       <div className="max-w-4xl mx-auto space-y-8">
-        <header className="border-b border-[rgba(108,92,231,0.25)] pb-6">
+        <header className="border-b border-[var(--border-default)] pb-6">
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Settings className="w-6 h-6 text-[#6c5ce7]" />
+            <Settings className="w-6 h-6 text-[var(--accent-primary)]" />
             Global Platform Settings
           </h1>
-          <p className="text-[#8a99ad] mt-2">Manage infrastructure, legal, and analytics integrations.</p>
+          <p className="text-[var(--text-secondary)] mt-2">Manage infrastructure, legal, and analytics integrations.</p>
         </header>
 
         <form onSubmit={handleSave} className="space-y-8">
-          <section className="bg-[rgba(10,15,30,0.8)] border border-[rgba(108,92,231,0.15)] rounded-xl p-6 shadow-sm">
+          <section className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-xl p-6 shadow-sm">
             <h2 className="text-xl font-semibold flex items-center gap-2 mb-6">
               <Shield className="w-5 h-5 text-blue-500" /> Legal & Analytics
             </h2>
@@ -80,7 +80,7 @@ export default function AdminSettingsPage() {
                   placeholder="G-XXXXXXXXXX" 
                   className={inputClass} 
                 />
-                <p className="text-xs text-[#8a99ad] mt-1">Your GA4 Measurement ID.</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">Your GA4 Measurement ID.</p>
               </div>
               <div>
                 <label className={labelClass}>Termly UUID</label>
@@ -91,7 +91,7 @@ export default function AdminSettingsPage() {
                   placeholder="UUID..." 
                   className={inputClass} 
                 />
-                <p className="text-xs text-[#8a99ad] mt-1">Cookie consent banner UUID.</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">Cookie consent banner UUID.</p>
               </div>
             </div>
           </section>
@@ -99,7 +99,7 @@ export default function AdminSettingsPage() {
           <button 
             type="submit" 
             disabled={saving}
-            className="px-8 py-3 bg-[#6c5ce7] hover:bg-[#5a4bcf] disabled:opacity-50 text-white rounded-lg font-semibold shadow-lg shadow-[#6c5ce7]/25 transition-all"
+            className="px-8 py-3 bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] disabled:opacity-50 text-[var(--text-primary)] rounded-lg font-semibold shadow-lg shadow-sm transition-all"
           >
             {saving ? 'Saving...' : 'Save Global Settings'}
           </button>

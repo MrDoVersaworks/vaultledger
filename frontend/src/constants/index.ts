@@ -1,17 +1,12 @@
+export const APPLICATION_CURRENCY_CODE = 'USD';
+
 // ============================================================
 // API BASE URL
 // ============================================================
-const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '');
+const API_URL = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/\/+$/, '');
 
-// Dynamically resolve API URL for local network access (e.g. from mobile)
-export const API_BASE_URL = typeof window !== 'undefined' 
-  ? API_URL?.replace('localhost', window.location.hostname) || `http://${window.location.hostname}:5002`
-  : API_URL || 'http://localhost:5002';
-
-// ============================================================
-// AUTHKEYS
-// ============================================================
-export const ACCESS_TOKEN_KEY = 'vaultledger_access_token';
+// Development may use the documented VaultLedger backend port; production must be configured explicitly.
+export const API_BASE_URL = API_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:5002' : '');
 
 // ============================================================
 // PAGINATION

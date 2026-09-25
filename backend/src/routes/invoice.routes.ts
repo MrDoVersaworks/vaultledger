@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
-import { invoiceSchema, invoiceStatusSchema } from '../types/index.js';
+import { invoiceSchema, invoiceStatusSchema, uuidParamSchema } from '../types/index.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import {
   getInvoices,
@@ -29,7 +29,7 @@ router.get('/', asyncHandler(async (req: Request, res: Response): Promise<void> 
 }));
 
 // GET /api/invoices/:id
-router.get('/:id', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.get('/:id', validate(uuidParamSchema, 'params'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId!;
   const invoiceId = req.params.id;
 
@@ -68,6 +68,10 @@ router.post(
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
+        if ((error as any).code === '23505' && (error as any).constraint === 'invoices_user_invoice_number_unique') {
+          res.status(409).json({ success: false, error: { code: 'ERR_INVOICE_NUMBER_EXISTS', message: 'Invoice number already exists for this account.' } });
+          return;
+        }
         if (error.message.includes('ERR_CLIENT_NOT_FOUND')) {
           res.status(400).json({
             success: false,
@@ -84,6 +88,7 @@ router.post(
 // PUT /api/invoices/:id
 router.put(
   '/:id',
+  validate(uuidParamSchema, 'params'),
   validate(invoiceSchema),
   asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.userId!;
@@ -97,6 +102,10 @@ router.put(
       });
     } catch (error: unknown) {
       if (error instanceof Error) {
+        if ((error as any).code === '23505' && (error as any).constraint === 'invoices_user_invoice_number_unique') {
+          res.status(409).json({ success: false, error: { code: 'ERR_INVOICE_NUMBER_EXISTS', message: 'Invoice number already exists for this account.' } });
+          return;
+        }
         if (error.message.includes('ERR_INVOICE_NOT_FOUND')) {
           res.status(404).json({
             success: false,
@@ -120,6 +129,7 @@ router.put(
 // PATCH /api/invoices/:id/status
 router.patch(
   '/:id/status',
+  validate(uuidParamSchema, 'params'),
   validate(invoiceStatusSchema),
   asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.userId!;
@@ -149,7 +159,7 @@ router.patch(
 );
 
 // DELETE /api/invoices/:id
-router.delete('/:id', asyncHandler(async (req: Request, res: Response): Promise<void> => {
+router.delete('/:id', validate(uuidParamSchema, 'params'), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const userId = req.userId!;
   const invoiceId = req.params.id;
 

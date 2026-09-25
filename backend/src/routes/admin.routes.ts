@@ -5,6 +5,8 @@ import { eq, desc } from 'drizzle-orm';
 import { authMiddleware } from '../middleware/auth.js';
 import { ownerMiddleware } from '../middleware/owner.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { validate } from '../middleware/validate.js';
+import { uuidParamSchema } from '../types/index.js';
 
 const router = Router();
 
@@ -20,17 +22,24 @@ router.get('/inbox', async (_req: Request, res: Response, next: NextFunction): P
       .from(contactMessages)
       .orderBy(desc(contactMessages.created_at));
 
-    res.status(200).json({
-      success: true,
-      data: messages,
-    });
+    const data = messages.map((message) => ({
+      id: message.id,
+      senderName: message.sender_name,
+      senderEmail: message.sender_email,
+      message: message.message,
+      isRead: message.is_read,
+      aiScreeningPassed: message.ai_screening_passed,
+      createdAt: message.created_at,
+    }));
+
+    res.status(200).json({ success: true, data });
   } catch (error) {
     next(error);
   }
 });
 
 // PATCH /api/admin/inbox/:id/read - Mark message as read
-router.patch('/inbox/:id/read', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.patch('/inbox/:id/read', validate(uuidParamSchema, 'params'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -47,7 +56,15 @@ router.patch('/inbox/:id/read', async (req: Request, res: Response, next: NextFu
 
     res.status(200).json({
       success: true,
-      data: updated,
+      data: {
+        id: updated.id,
+        senderName: updated.sender_name,
+        senderEmail: updated.sender_email,
+        message: updated.message,
+        isRead: updated.is_read,
+        aiScreeningPassed: updated.ai_screening_passed,
+        createdAt: updated.created_at,
+      },
     });
   } catch (error) {
     next(error);
@@ -55,7 +72,7 @@ router.patch('/inbox/:id/read', async (req: Request, res: Response, next: NextFu
 });
 
 // DELETE /api/admin/inbox/:id - Delete message
-router.delete('/inbox/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.delete('/inbox/:id', validate(uuidParamSchema, 'params'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -109,7 +126,16 @@ router.put('/settings', async (req: Request, res: Response, next: NextFunction):
         .returning();
     }
 
-    res.status(200).json({ success: true, data: updated });
+    res.status(200).json({
+      success: true,
+      data: {
+        id: updated.id,
+        googleAnalyticsId: updated.google_analytics_id,
+        termlyUuid: updated.termly_uuid,
+        createdAt: updated.created_at,
+        updatedAt: updated.updated_at,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -121,13 +147,40 @@ router.put('/settings', async (req: Request, res: Response, next: NextFunction):
 router.get('/reviews', async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const reviews = await db.select().from(platformReviews).orderBy(desc(platformReviews.created_at));
-    res.status(200).json({ success: true, data: reviews });
+    const data = reviews.map((review) => ({
+      id: review.id,
+      name: review.name,
+      profession: review.profession,
+      rating: review.rating,
+      feedback: review.feedback,
+      status: review.status,
+      createdAt: review.created_at,
+      updatedAt: review.updated_at,
+    }));
+    res.status(200).json({ success: true, data });
   } catch (error) {
     next(error);
   }
 });
 
-router.delete('/reviews/:id', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.patch('/reviews/:id/approve', validate(uuidParamSchema, 'params'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const [updated] = await db.update(platformReviews)
+      .set({ status: 'approved', updated_at: new Date() })
+      .where(eq(platformReviews.id, id as any))
+      .returning();
+    if (!updated) {
+      next(new AppError('[ERR_REVIEW_NOT_FOUND] Review not found.', 404));
+      return;
+    }
+    res.status(200).json({ success: true, data: updated });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/reviews/:id', validate(uuidParamSchema, 'params'), async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { id } = req.params;
     const [deleted] = await db.delete(platformReviews).where(eq(platformReviews.id, id as any)).returning();

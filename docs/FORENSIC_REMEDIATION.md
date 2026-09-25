@@ -71,8 +71,9 @@ Where historical intent is not provable from the commit graph, the item remains 
 - Expired revocation/rate-limit records are cleaned during security-state activity.
 - The migration journal now registers the remediation migrations so db:migrate can discover 0003/0004/0005.
 
-### Financial arithmetic
+### Data integrity and financial arithmetic
 
+- Invoice numbers are now unique per user; migration 0006 refuses to silently rewrite existing duplicate invoice numbers and instead fails explicitly for manual reconciliation.
 - Invoice line/tax calculations no longer use JavaScript floating-point arithmetic for financial totals.
 - Invoice and expense inputs are explicitly constrained to the database's two-decimal money precision; invoice arithmetic now passes the correct two-decimal scale into the fixed-point helpers.
 - Dashboard monthly revenue/expense aggregation uses integer cents internally before converting to the existing numeric API contract.

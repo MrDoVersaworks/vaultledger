@@ -86,10 +86,10 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
       >
         {/* Brand Header */}
         <div className="flex items-center gap-3 px-6 h-[var(--header-height)] border-b border-[var(--border-default)]">
-          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-cyan-500">
+          <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[var(--accent-primary)]">
             <Lock size={16} className="text-white font-bold" />
           </div>
-          <h2 className="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+          <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
             VaultLedger
           </h2>
         </div>
@@ -109,7 +109,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
                 id={`nav-${link.label.toLowerCase()}`}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group ${
                   isActive
-                    ? 'bg-gradient-to-r from-emerald-500/10 to-cyan-500/5 text-emerald-500 border border-emerald-500/15 shadow-sm'
+                    ? 'bg-[var(--bg-card-hover)] text-[var(--text-primary)] border border-[var(--border-default)]'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card-hover)] border border-transparent'
                 }`}
               >
@@ -128,7 +128,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
         <div className="p-4 border-t border-[var(--border-default)] space-y-4">
           {/* User profile brief card */}
           <div className="flex items-center gap-3 p-2 rounded-xl bg-[var(--bg-card)] border border-[var(--border-default)]">
-            <div className="flex items-center justify-center w-10 h-10 font-bold rounded-lg bg-gradient-to-tr from-emerald-500/20 to-cyan-500/25 text-emerald-500 border border-emerald-500/10">
+            <div className="flex items-center justify-center w-10 h-10 font-bold rounded-lg bg-[var(--bg-card-hover)] text-[var(--accent-primary)] border border-[var(--border-default)]">
               {userInitial}
             </div>
             <div className="flex-1 min-w-0">
@@ -175,11 +175,11 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-y-auto">
         {/* Top Header Placeholder spacing / responsive spacing */}
-        <div className="h-[var(--header-height)] flex items-center justify-between px-6 pr-14 md:pr-6 border-b border-[var(--border-default)] bg-[var(--bg-card)]/80 backdrop-blur-md sticky top-0 z-30">
+        <div className="h-[var(--header-height)] flex items-center justify-between px-6 pr-14 md:pr-6 border-b border-[var(--border-default)] bg-[var(--bg-card)]/95 backdrop-blur-sm sticky top-0 z-30">
           <div className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest hidden md:block">
             Sovereign Ledger Panel
           </div>
-          <div className="text-xs font-bold text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full flex items-center gap-1.5 ml-auto md:ml-0 shadow-sm">
+          <div className="text-xs font-bold text-[var(--accent-primary)] bg-[var(--bg-card-hover)] border border-[var(--border-default)] px-2.5 py-1 rounded-full flex items-center gap-1.5 ml-auto md:ml-0 shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
             <span>Vault Database Connected</span>
           </div>

@@ -2,13 +2,13 @@ name: VaultLedger CI
 
 on:
   push:
-    branches: [ main, audit-remediation ]
+    branches: [main, audit-remediation]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   backend-audit:
-    name: Backend — Type Check
+    name: Backend — Type Check, Tests & Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -19,8 +19,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: './backend/package-lock.json'
+          cache: npm
+          cache-dependency-path: ./backend/package-lock.json
       - run: npm install
       - name: Type Check
         run: npx tsc --noEmit
@@ -28,12 +28,9 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
-        env:
-          JWT_SECRET: ci_secret_key_for_testing_purposes_only_32bytes
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ci_db
 
   frontend-audit:
-    name: Frontend — Type Check
+    name: Frontend — Type Check & Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -44,16 +41,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: './frontend/package-lock.json'
+          cache: npm
+          cache-dependency-path: ./frontend/package-lock.json
       - run: npm install
       - name: Type Check
         run: npx tsc --noEmit --skipLibCheck
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:5002
       - name: Production Build
         run: npm run build
         env:
-          NEXT_PUBLIC_API_URL: http://localhost:3000
-
+          NEXT_PUBLIC_API_URL: http://localhost:5002
 
   e2e:
     name: E2E — Playwright
@@ -62,86 +60,18 @@ jobs:
       postgres:
         image: postgres:16
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: vaultledger_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U postgres -d vaultledger_test"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: |
-            ./backend/package-lock.json
-            ./frontend/package-lock.json
-      - name: Install backend
-        working-directory: ./backend
-        run: npm install
-      - name: Install frontend
-        working-directory: ./frontend
-        run: npm install
-      - name: Run database migrations
-        working-directory: ./backend
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vaultledger_test
-          JWT_ACCESS_SECRET: test_access_secret
-          JWT_REFRESH_SECRET: test_refresh_secret
-          AES_ENCRYPTION_KEY: test_encryption_key_32bytes_long
-          NODE_ENV: test
-          CORS_ORIGIN: http://localhost:3002
-        run: npm run db:migrate
-      - name: Seed E2E administrator
-        working-directory: ./backend
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vaultledger_test
-          E2E_ADMIN_EMAIL: admin.e2e@vaultledger.test
-          E2E_ADMIN_PASSWORD: VaultLedger-E2E-Password-2026!
-        run: |
-          node --input-type=module -e "import bcrypt from 'bcryptjs'; import pg from 'pg'; const pool = new pg.Pool({connectionString: process.env.DATABASE_URL}); const hash = await bcrypt.hash(process.env.E2E_ADMIN_PASSWORD, 4); await pool.query('INSERT INTO users (email, password_hash, name, role) VALUES (\$1, \$2, \$3, \$4) ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = EXCLUDED.role', [process.env.E2E_ADMIN_EMAIL, hash, 'E2E Administrator', 'admin']); await pool.end();"
-      - name: Install Playwright browser
-        working-directory: ./frontend
-        run: npx playwright install --with-deps chromium
-      - name: Run E2E suite
-        working-directory: ./frontend
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vaultledger_test
-          JWT_ACCESS_SECRET: test_access_secret
-          JWT_REFRESH_SECRET: test_refresh_secret
-          AES_ENCRYPTION_KEY: test_encryption_key_32bytes_long
-          NODE_ENV: test
-          CORS_ORIGIN: http://localhost:3002
-          NEXT_PUBLIC_API_URL: http://localhost:5002
-          E2E_ADMIN_EMAIL: admin.e2e@vaultledger.test
-          E2E_ADMIN_PASSWORD: VaultLedger-E2E-Password-2026!
-        run: npx playwright test
-
-
-  e2e:
-    name: End-to-End — Public, Auth, Admin & Security
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: vaultledger_ci
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U postgres -d vaultledger_ci"
+          --health-cmd "pg_isready -U postgres -d vaultledger_test"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vaultledger_ci
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vaultledger_test
       JWT_ACCESS_SECRET: ci_access_secret_32_chars_minimum
       JWT_REFRESH_SECRET: ci_refresh_secret_32_chars_minimum
       AES_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
@@ -159,7 +89,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: |
             ./backend/package-lock.json
             ./frontend/package-lock.json

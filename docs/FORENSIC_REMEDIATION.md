@@ -170,3 +170,15 @@ Runtime verification of `audit-remediation` is therefore still not closed: the c
 ## Current closure rule
 
 The remediation branch is **not declared fully closed** while runtime/CI evidence remains unavailable. Source changes are documented, but a green source tree is not being substituted for execution evidence. `main` remains untouched.
+
+### Production evidence captured from the untouched main deployment
+
+On 2026-09-25, the connected Vercel backend production deployment `dpl_4j855rsQPKKE3qFsJBQvt4HMXTX3` (main / `ea65b9d...`) was queried directly:
+- `GET /health` returned 200.
+- `GET /api/public/reviews` returned 200 with an empty approved list.
+- `GET /api/public/settings` returned 500.
+- Vercel runtime logs identify the failing query as a read from `system_settings`.
+
+This is direct production evidence for the migration/schema finding: the untouched main deployment is running code whose current schema expects `system_settings`, while the historical migration set did not create that table. The remediation adds `0007_current_schema_retrofit.sql`; it has **not** been applied to production because main and production must remain untouched during forensic remediation.
+
+Vercel runtime error inspection for both VaultLedger projects showed no other runtime errors in the preceding 24 hours at the time of inspection. The specific `/api/public/settings` 500 is nevertheless a verified active production defect on main.

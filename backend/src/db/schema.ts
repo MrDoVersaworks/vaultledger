@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, timestamp, boolean, numeric, integer, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, timestamp, boolean, numeric, integer, uniqueIndex, index } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { relations } from 'drizzle-orm';
 
@@ -137,6 +137,23 @@ export const platformReviews = pgTable('platform_reviews', {
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+// ============================================================
+// TABLE: rate_limit_buckets
+// ============================================================
+export const rateLimitBuckets = pgTable('rate_limit_buckets', {
+  key: varchar('key', { length: 512 }).primaryKey(),
+  hits: integer('hits').notNull().default(0),
+  reset_at: timestamp('reset_at', { withTimezone: true }).notNull(),
+}, (table) => [index('rate_limit_reset_idx').on(table.reset_at)]);
+
+// ============================================================
+// TABLE: revoked_access_tokens
+// ============================================================
+export const revokedAccessTokens = pgTable('revoked_access_tokens', {
+  signature: varchar('signature', { length: 512 }).primaryKey(),
+  expires_at: timestamp('expires_at', { withTimezone: true }).notNull(),
+}, (table) => [index('revoked_access_tokens_expires_idx').on(table.expires_at)]);
 
 // ============================================================
 // RELATIONS

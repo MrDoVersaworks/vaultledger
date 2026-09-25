@@ -6,7 +6,7 @@ import { apiRateLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
-router.get('/settings', async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.get('/settings', apiRateLimiter, async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const [settings] = await db.select().from(systemSettings).limit(1);
     res.status(200).json({
@@ -21,7 +21,7 @@ router.get('/settings', async (_req: Request, res: Response, next: NextFunction)
   }
 });
 
-router.get('/reviews', async (_req: Request, res: Response): Promise<void> => {
+router.get('/reviews', apiRateLimiter, async (_req: Request, res: Response): Promise<void> => {
   const reviews = await db
     .select()
     .from(platformReviews)

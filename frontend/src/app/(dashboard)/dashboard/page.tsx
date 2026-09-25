@@ -17,6 +17,15 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+function formatMoney(value: string | number): string {
+  const cents = BigInt(Math.round(Number(value) * 100));
+  const sign = cents < 0n ? '-' : '';
+  const absolute = cents < 0n ? -cents : cents;
+  const whole = absolute / 100n;
+  const fraction = (absolute % 100n).toString().padStart(2, '0');
+  return `${sign}${whole.toLocaleString('en-US')}.${fraction}`;
+}
+
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [trend, setTrend] = useState<MonthlyDashboardData[]>([]);
@@ -48,9 +57,9 @@ export default function DashboardPage() {
     loadDashboardData();
   }, []);
 
-  const totalRevenueNum = Number(summary?.totalRevenue || 0);
-  const totalExpensesNum = Number(summary?.totalExpenses || 0);
-  const profit = totalRevenueNum - totalExpensesNum;
+  const totalRevenueCents = BigInt(Math.round(Number(summary?.totalRevenue || 0) * 100));
+  const totalExpensesCents = BigInt(Math.round(Number(summary?.totalExpenses || 0) * 100));
+  const profitCents = totalRevenueCents - totalExpensesCents;
 
   if (isLoading) {
     return (
@@ -104,7 +113,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="text-2xl font-black mt-4 text-[var(--text-primary)]">
-            ${totalRevenueNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${formatMoney(summary?.totalRevenue || '0.00')}
           </div>
           <div className="text-[11px] text-emerald-500 font-semibold mt-1 flex items-center gap-0.5">
             <span>{summary?.paidInvoicesCount || 0} paid invoices logged</span>
@@ -121,7 +130,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="text-2xl font-black mt-4 text-[var(--text-primary)]">
-            ${totalExpensesNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${formatMoney(summary?.totalExpenses || '0.00')}
           </div>
           <div className="text-[11px] text-[var(--text-secondary)] font-semibold mt-1 flex items-center gap-0.5">
             <span>Operating outgoing costs</span>
@@ -138,7 +147,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="text-2xl font-black mt-4 text-[var(--text-primary)]">
-            ${Number(summary?.outstanding || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${formatMoney(summary?.outstanding || '0.00')}
           </div>
           <div className="text-[11px] text-amber-500 font-semibold mt-1">
             {summary?.draftInvoicesCount || 0} drafts awaiting completion
@@ -154,8 +163,8 @@ export default function DashboardPage() {
               <TrendingUp size={16} />
             </div>
           </div>
-          <div className={`text-2xl font-black mt-4 ${profit >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-            ${profit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          <div className={`text-2xl font-black mt-4 ${profitCents >= 0n ? 'text-emerald-500' : 'text-rose-500'}`}>
+            ${formatMoney(Number(profitCents) / 100)}
           </div>
           <div className="text-[11px] text-[var(--text-secondary)] font-semibold mt-1">
             Realized cash flow margin

@@ -62,9 +62,20 @@ Where historical intent is not provable from the commit graph, the item remains 
 - Admin inbox responses are projected into stable camelCase DTOs rather than leaking database column names.
 - Public settings are projected to an explicit public DTO rather than returning the whole settings row.
 
+### Persistent security state and deployment semantics
+
+- The original rate limiter used the default in-memory express-rate-limit store. That state is process-local and therefore not reliable across serverless/restarted/multi-instance deployments.
+- Rate-limit counters are now persisted in PostgreSQL and keyed by limiter + client IP, with atomic window rollover. Auth, public contact submission, and public review submission use the persistent limiter.
+- The backend explicitly trusts one reverse proxy hop so the limiter receives the client IP when deployed behind Render/Vercel-style ingress.
+- The JWT access-token blocklist was process-local. It is now backed by PostgreSQL with expiry-aware revocation records, so logout/account deletion invalidation survives process restarts and multiple instances.
+- Expired revocation/rate-limit records are cleaned during security-state activity.
+- The migration journal now registers the remediation migrations so db:migrate can discover 0003/0004/0005.
+
 ### Financial arithmetic
 
 - Invoice line/tax calculations no longer use JavaScript floating-point arithmetic for financial totals.
+- Invoice and expense inputs are explicitly constrained to the database's two-decimal money precision; invoice arithmetic now passes the correct two-decimal scale into the fixed-point helpers.
+- Dashboard monthly revenue/expense aggregation uses integer cents internally before converting to the existing numeric API contract.
 - A fixed-point BigInt helper performs quantity/price multiplication and tax rounding before values are persisted as decimal strings.
 - Targeted regression tests cover 0.1 × 0.2, deterministic half-cent rounding, and 7.25% tax.
 
@@ -88,12 +99,12 @@ GitHub status on the current remediation tip reported Vercel failures caused by 
 
 ## Explicitly open / not yet closed
 
-- Distributed/persistent rate limiting across auth/contact/public review paths.
-- Persistent refresh/access-token revocation semantics; the current JWT blocklist remains process-local.
-- Full migration/snapshot validation against a real PostgreSQL database, including duplicate-email failure behavior.
+- Distributed/persistent rate limiting across auth/contact/public review paths. **Implemented; CI migration/E2E verification pending.**
+- Persistent refresh/access-token revocation semantics. **Access-token revocation is now persistent; refresh-token rotation still needs concurrent-reuse runtime verification.**
+- Full migration/snapshot validation against a real PostgreSQL database, including duplicate-email failure behavior. **CI database migration is now wired; duplicate-email migration behavior still needs a targeted fixture test.**
 - Complete API contract reconciliation across every frontend/backend endpoint.
 - Full billing/subscription, external-integration, worker/scheduler, recovery/fallback, and persistence review required by the audit handoff.
-- Runtime integration tests for login -> refresh rotation -> logout, admin denial/allowance, public review moderation, contact delivery, and invoice arithmetic.
+- Runtime integration tests for login -> refresh rotation -> logout, admin denial/allowance, public review moderation, contact delivery, and invoice arithmetic. **E2E suite is wired; authenticated runtime paths still need dedicated seeded-user coverage.**
 - Deployment/package verification after the current Vercel rate-limit block clears.
 
 ## Closure rule

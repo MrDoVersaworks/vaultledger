@@ -130,7 +130,6 @@ router.put(
 router.patch(
   '/:id/status',
   validate(uuidParamSchema, 'params'),
-  validate(uuidParamSchema, 'params'),
   validate(invoiceStatusSchema),
   asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.userId!;

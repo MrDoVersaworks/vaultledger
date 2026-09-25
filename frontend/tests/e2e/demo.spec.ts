@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-const BACKEND_URL = 'http://localhost:5002';
-const FRONTEND_URL = 'http://localhost:3002';
+const BACKEND_URL = process.env.PLAYWRIGHT_BACKEND_URL?.trim() || 'http://localhost:5002';
+const FRONTEND_URL = process.env.PLAYWRIGHT_BASE_URL?.trim() || 'http://localhost:3002';
 
 test.describe('VaultLedger — Public & User Features', () => {
   /* ---- UI Page Render Checks ---- */

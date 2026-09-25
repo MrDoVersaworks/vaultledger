@@ -55,7 +55,14 @@ router.patch('/inbox/:id/read', async (req: Request, res: Response, next: NextFu
     res.status(200).json({
       success: true,
       data: {
-        id: updated.id,\n        senderName: updated.sender_name,\n        senderEmail: updated.sender_email,\n        message: updated.message,\n        isRead: updated.is_read,\n        aiScreeningPassed: updated.ai_screening_passed,\n        createdAt: updated.created_at,\n      },
+        id: updated.id,
+        senderName: updated.sender_name,
+        senderEmail: updated.sender_email,
+        message: updated.message,
+        isRead: updated.is_read,
+        aiScreeningPassed: updated.ai_screening_passed,
+        createdAt: updated.created_at,
+      },
     });
   } catch (error) {
     next(error);

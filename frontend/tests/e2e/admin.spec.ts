@@ -46,6 +46,11 @@ test.describe('VaultLedger — Admin & Management Controls', () => {
     expect(res.status()).toBe(401);
   });
 
+  test('PATCH /admin/reviews/:id/approve rejects unauthenticated request', async ({ request }) => {
+    const res = await request.patch(`${BACKEND_URL}/api/admin/reviews/fake-review-id/approve`);
+    expect(res.status()).toBe(401);
+  });
+
   test('DELETE /admin/reviews/:id rejects unauthenticated request', async ({ request }) => {
     const res = await request.delete(`${BACKEND_URL}/api/admin/reviews/fake-review-id`);
     expect(res.status()).toBe(401);

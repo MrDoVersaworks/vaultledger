@@ -44,7 +44,7 @@ export async function getDashboardSummary(userId: string): Promise<DashboardSumm
 }
 
 export async function getMonthlyTrend(userId: string): Promise<MonthlyDashboardData[]> {
-  const months: MonthlyDashboardData[] = [];
+  const months: Array<{ month: string; revenueCents: bigint; expensesCents: bigint }> = [];
   
   // Generate the last 6 months dynamically (e.g. "Jan", "Feb" format)
   const now = new Date();

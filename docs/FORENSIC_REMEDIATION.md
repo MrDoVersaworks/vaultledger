@@ -96,7 +96,7 @@ A backend test command was added: tsx --test src/utils/*.test.ts
 
 The fixed-point test suite was added at backend/src/utils/decimal.test.ts.
 
-GitHub status on the current remediation tip reported Vercel failures caused by the Vercel build-rate-limit target, not a reported TypeScript/build error. Therefore deployment/build verification is not yet closed.
+GitHub status on the current remediation tip reports only Vercel deployment failures caused by the Vercel build-rate-limit target. No GitHub Actions check-runs are being returned for the remediation commits, so CI execution cannot currently be treated as evidence of passing type/build/E2E tests. The workflow itself has been consolidated to run backend type/unit/build checks, frontend type/build checks, PostgreSQL migrations, E2E seeding, and Playwright E2E tests when Actions execution is available. Therefore runtime/build verification is not yet closed.
 
 ## Explicitly open / not yet closed
 
@@ -107,6 +107,7 @@ GitHub status on the current remediation tip reported Vercel failures caused by 
 - Full billing/subscription, external-integration, worker/scheduler, recovery/fallback, and persistence review required by the audit handoff.
 - Runtime integration tests for login -> refresh rotation -> logout, admin denial/allowance, public review moderation, contact delivery, and invoice arithmetic. **E2E suite is wired; authenticated runtime paths still need dedicated seeded-user coverage.**
 - Deployment/package verification after the current Vercel rate-limit block clears.
+- GitHub Actions execution of the consolidated CI/E2E workflow; the repository currently exposes no check-runs for the remediation commits.
 
 ## Closure rule
 

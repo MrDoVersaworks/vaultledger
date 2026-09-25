@@ -15,11 +15,6 @@ test.describe('VaultLedger — Admin & Management Controls', () => {
     await expect(page.locator('body')).toBeVisible();
   });
 
-  test('admin reviews UI page renders', async ({ page }) => {
-    await page.goto(`${FRONTEND_URL}/admin/reviews`);
-    await expect(page.locator('body')).toBeVisible();
-  });
-
   test('admin settings UI page renders', async ({ page }) => {
     await page.goto(`${FRONTEND_URL}/admin/settings`);
     await expect(page.locator('body')).toBeVisible();

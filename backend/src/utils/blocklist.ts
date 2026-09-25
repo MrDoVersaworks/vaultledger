@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { eq } from 'drizzle-orm';
+import { eq, lt } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { revokedAccessTokens } from '../db/schema.js';
 
@@ -28,9 +28,8 @@ export async function revokeAccessToken(token: string): Promise<void> {
     })
     .onConflictDoNothing();
 
-  await db.delete(revokedAccessTokens).where(
-    eq(revokedAccessTokens.expires_at, new Date(0))
-  ).catch(() => undefined);
+  // Revocation records are only useful until their JWT expires.
+  await db.delete(revokedAccessTokens).where(lt(revokedAccessTokens.expires_at, new Date()));
 }
 
 export async function isAccessTokenRevoked(signature: string): Promise<boolean> {

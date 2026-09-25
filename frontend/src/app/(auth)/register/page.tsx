@@ -39,7 +39,7 @@ export default function RegisterPage() {
 
     try {
       await register(email, password, name, businessName || undefined);
-      toast.success('Your VaultLedger has been initialized successfully!');
+      toast.success('Your account has been created successfully!');
       router.push('/dashboard');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Registration failed. Please try again.';
@@ -58,10 +58,10 @@ export default function RegisterPage() {
             <Lock className="w-6 h-6 text-white" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-[var(--text-primary)]">
-            Initialize Ledger
+            Create your account
           </h1>
           <p className="text-[var(--text-secondary)] mt-2 text-sm">
-            Configure your secure corporate accounting chamber
+            Set up your VaultLedger account
           </p>
         </div>
 

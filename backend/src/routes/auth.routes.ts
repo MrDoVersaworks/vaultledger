@@ -158,17 +158,10 @@ router.delete(
 
       const { password } = req.body;
 
-      // Blocklist the current access token immediately
       const authHeader = req.headers.authorization;
       if (authHeader) {
         const token = authHeader.split(' ')[1];
-        if (token) {
-          const signature = token.split('.')[2];
-          if (signature) {
-            const decoded = jwt.decode(token) as { exp?: number } | null;
-        if (decoded?.exp) await revokeAccessToken(signature, new Date(decoded.exp * 1000));
-          }
-        }
+        if (token) await revokeAccessToken(token);
       }
 
       await deleteUserAccount(userId, password);

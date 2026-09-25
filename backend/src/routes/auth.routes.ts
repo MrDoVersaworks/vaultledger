@@ -165,7 +165,8 @@ router.delete(
         if (token) {
           const signature = token.split('.')[2];
           if (signature) {
-            jwtBlocklist.add(signature);
+            const decoded = jwt.decode(token) as { exp?: number } | null;
+        if (decoded?.exp) await revokeAccessToken(signature, new Date(decoded.exp * 1000));
           }
         }
       }

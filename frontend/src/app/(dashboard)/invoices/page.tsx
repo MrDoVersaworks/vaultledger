@@ -76,7 +76,7 @@ export default function InvoicesPage() {
     setClientId('');
     // Auto-generate invoice number format (e.g. INV-2026-X)
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    setInvoiceNumber(`INV-2026-${randomSuffix}`);
+    setInvoiceNumber(`INV-${new Date().getFullYear()}-${randomSuffix}`);
     setDueDate('');
     setTaxRate(0);
     setNotes('');

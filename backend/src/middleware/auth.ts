@@ -1,15 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { jwtBlocklist } from '../utils/blocklist.js';
+import { isAccessTokenRevoked } from '../utils/blocklist.js';
 import { config } from '../config/index.js';
 import { ErrorCode } from '../constants/index.js';
 import type { JwtAccessPayload, ApiErrorResponse } from '../types/index.js';
 
-export function authMiddleware(
+export async function authMiddleware(
   req: Request,
   res: Response,
   next: NextFunction
-): void {
+): Promise<void> {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -40,43 +40,46 @@ export function authMiddleware(
   const token = parts[1];
 
   try {
+    const decoded = jwt.verify(token, config.JWT_ACCESS_SECRET) as JwtAccessPayload;
     const signature = token.split('.')[2];
-    if (signature && jwtBlocklist.has(signature)) {
-      const response: ApiErrorResponse = {
+
+    if (signature && await isAccessTokenRevoked(signature)) {
+      res.status(401).json({
         success: false,
         error: {
           code: ErrorCode.AUTH_TOKEN_INVALID,
           message: 'Session invalidated. Please log in again.',
         },
-      };
-      res.status(401).json(response);
+      } satisfies ApiErrorResponse);
       return;
     }
 
-    const decoded = jwt.verify(token, config.JWT_ACCESS_SECRET) as JwtAccessPayload;
     req.userId = decoded.userId;
     req.userEmail = decoded.email;
     next();
   } catch (error: unknown) {
     if (error instanceof jwt.TokenExpiredError) {
-      const response: ApiErrorResponse = {
+      res.status(401).json({
         success: false,
         error: {
           code: ErrorCode.AUTH_TOKEN_EXPIRED,
           message: 'Access token has expired. Please refresh your token.',
         },
-      };
-      res.status(401).json(response);
+      } satisfies ApiErrorResponse);
       return;
     }
 
-    const response: ApiErrorResponse = {
+    if (error instanceof Error && error.message.includes('ECONN')) {
+      next(error);
+      return;
+    }
+
+    res.status(401).json({
       success: false,
       error: {
         code: ErrorCode.AUTH_TOKEN_INVALID,
         message: 'Invalid access token.',
       },
-    };
-    res.status(401).json(response);
+    } satisfies ApiErrorResponse);
   }
 }

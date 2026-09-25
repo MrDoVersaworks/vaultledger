@@ -34,3 +34,7 @@ export async function isAccessTokenRevoked(signature: string): Promise<boolean> 
   return Boolean(revoked);
 }
 
+
+export async function purgeExpiredAccessTokenRevocations(): Promise<void> {
+  await db.delete(revokedAccessTokens).where(lt(revokedAccessTokens.expires_at, new Date()));
+}

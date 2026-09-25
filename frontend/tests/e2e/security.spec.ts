@@ -99,17 +99,17 @@ test('authenticated session lifecycle rotates refresh state and logout revokes i
   expect(login.status()).toBe(200);
 
   const refresh = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
-    headers: { Origin: 'http://localhost:3002' },
+    headers: { Origin: FRONTEND_URL },
   });
   expect(refresh.status()).toBe(200);
 
   const logout = await request.post(`${BACKEND_URL}/api/auth/logout`, {
-    headers: { Origin: 'http://localhost:3002' },
+    headers: { Origin: FRONTEND_URL },
   });
   expect(logout.status()).toBe(200);
 
   const afterLogout = await request.post(`${BACKEND_URL}/api/auth/refresh`, {
-    headers: { Origin: 'http://localhost:3002' },
+    headers: { Origin: FRONTEND_URL },
   });
   expect(afterLogout.status()).toBe(401);
 });

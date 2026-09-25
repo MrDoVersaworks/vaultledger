@@ -23,28 +23,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     async function restoreSession() {
       try {
-        const data = await apiRequest<ApiResponse<{ accessToken: string; user: User }>>({
+        const data = await apiRequest<ApiResponse<{ accessToken: string; user: AuthUser }>>({
           method: 'POST',
           path: '/api/auth/refresh',
           requiresAuth: false,
         });
 
-        if (data.success) {
+        if (data.success && data.data) {
           setAccessToken(data.data.accessToken);
-
-          // Decode user info from JWT payload
-          const payload = JSON.parse(atob(data.data.accessToken.split('.')[1]));
-
-          if (!payload.userId || !payload.email || !payload.name) {
-            throw new Error('[ERR_AUTH_INVALID_TOKEN] JWT payload missing required fields.');
-          }
-
-          setUser({
-            id: payload.userId,
-            email: payload.email,
-            name: payload.name,
-            businessName: payload.businessName || null
-          });
+          setUser(data.data.user);
+          setIsAuthenticated(true);
         }
       } catch {
         // No valid session — user remains unauthenticated

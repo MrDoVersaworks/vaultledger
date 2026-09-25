@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { users, refreshTokens } from '../db/schema.js';
 import { config } from '../config/index.js';
@@ -151,10 +151,21 @@ export async function refreshAccessToken(refreshTokenValue: string): Promise<Log
   const rawToken = refreshTokenValue.substring(dotIndex + 1);
 
   return db.transaction(async (tx) => {
-    const tokenRows = await tx.select().from(refreshTokens).where(eq(refreshTokens.id, tokenId)).limit(1);
-    if (tokenRows.length === 0) throw new Error('[' + ErrorCode.AUTH_REFRESH_FAILED + '] Refresh token not found.');
-
-    const storedToken = tokenRows[0];
+    // Serialize concurrent refresh attempts for the same token. Without a row lock,
+    // two simultaneous requests can both validate the same one-time refresh token.
+    const tokenResult = await tx.execute(sql`
+      SELECT id, user_id, token_hash, expires_at
+      FROM refresh_tokens
+      WHERE id = ${tokenId}
+      FOR UPDATE
+    `);
+    const storedToken = tokenResult.rows[0] as {
+      id: string;
+      user_id: string;
+      token_hash: string;
+      expires_at: Date;
+    } | undefined;
+    if (!storedToken) throw new Error('[' + ErrorCode.AUTH_REFRESH_FAILED + '] Refresh token not found.');
     if (new Date() > storedToken.expires_at) {
       await tx.delete(refreshTokens).where(eq(refreshTokens.id, tokenId));
       throw new Error('[' + ErrorCode.AUTH_REFRESH_FAILED + '] Refresh token has expired.');

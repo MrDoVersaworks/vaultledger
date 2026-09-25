@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
@@ -9,7 +9,7 @@ import { PlatformReviews } from '@/components/PlatformReviews';
 import { UnifiedFooter } from '@/components/UnifiedFooter';
 
 export default function RootPage() {
-  const { isAuthenticated, isLoading, login, register } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [isDemoLoading, setIsDemoLoading] = useState(false);
 
@@ -19,40 +19,6 @@ export default function RootPage() {
       router.replace('/dashboard');
     }
   }, [isLoading, isAuthenticated, router]);
-
-  const [showPolicyModal, setShowPolicyModal] = useState(false);
-
-  const openDemoSandboxModal = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setShowPolicyModal(true);
-  };
-
-  const confirmDemoSandbox = async () => {
-    setShowPolicyModal(false);
-    if (isDemoLoading) return;
-    setIsDemoLoading(true);
-
-    const demoEmail = 'recruiter@sandbox.test';
-    const demoPassword = 'Password123!';
-
-    try {
-      // 1. Attempt standard login
-      await login(demoEmail, demoPassword);
-      toast.success('Successfully entered sandbox cockpit!');
-      router.push('/dashboard');
-    } catch (err: unknown) {
-      // 2. If user doesn't exist, automatically provision sandbox account in the background
-      try {
-        await register(demoEmail, demoPassword, 'Recruiter Guest', 'Sandbox Enterprises');
-        toast.success('Successfully provisioned guest sandbox account!');
-        router.push('/dashboard');
-      } catch (regErr: unknown) {
-        toast.error('Failed to initialize sandbox environment.');
-      }
-    } finally {
-      setIsDemoLoading(false);
-    }
-  };
 
   if (isLoading || isAuthenticated) {
     return (
@@ -252,47 +218,7 @@ export default function RootPage() {
               Launch Ledger Console
             </Link>
 
-            <button
-              onClick={openDemoSandboxModal}
-              disabled={isDemoLoading}
-              style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                color: '#ffffff',
-                border: '1px solid rgba(255, 255, 255, 0.08)',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                fontWeight: 700,
-                padding: '1rem 1.75rem',
-                borderRadius: '0.75rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.75rem',
-                transition: 'all 0.2s',
-              }}
-              className="action-btn-secondary"
-            >
-              {isDemoLoading ? (
-                <>
-                  <div style={{
-                    width: '18px',
-                    height: '18px',
-                    border: '2px solid rgba(255, 255, 255, 0.1)',
-                    borderTopColor: '#10b981',
-                    borderRadius: '50%',
-                    animation: 'spin 0.8s linear infinite',
-                  }} />
-                  Provisioning Sandbox...
-                </>
-              ) : (
-                <>
-                  <svg style={{ width: '1.25rem', height: '1.25rem', color: '#10b981' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Demo Sandbox (One-Click)
-                </>
-              )}
-            </button>
+
           </div>
         </div>
 
@@ -330,72 +256,6 @@ export default function RootPage() {
       <div style={{ position: 'relative', zIndex: 10, backgroundColor: 'rgba(8, 10, 16, 0.4)' }}>
         <PlatformReviews />
       </div>
-
-      {/* ── Policy Acceptance Modal for Demo Sandbox ── */}
-      {showPolicyModal && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          zIndex: 100,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1rem',
-          backgroundColor: 'rgba(8, 10, 16, 0.85)',
-          backdropFilter: 'blur(12px)',
-        }}>
-          <div style={{
-            width: '100%',
-            maxWidth: '500px',
-            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-            border: '1px solid rgba(16, 185, 129, 0.2)',
-            borderRadius: '1.25rem',
-            padding: '1.75rem',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
-            color: '#fff',
-          }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.75rem', color: '#fff' }}>
-              Terms of Service &amp; Usage Policy
-            </h3>
-            <p style={{ fontSize: '0.875rem', color: '#94a3b8', lineHeight: 1.6, marginBottom: '1.25rem' }}>
-              To access the VaultLedger Interactive Sandbox Cockpit, please confirm that you agree to our Financial Platform Terms of Service, Privacy Policy, and Sovereign Security Guidelines.
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
-              <button
-                onClick={() => setShowPolicyModal(false)}
-                style={{
-                  padding: '0.6rem 1.2rem',
-                  borderRadius: '0.75rem',
-                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  color: '#cbd5e1',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                }}
-              >
-                Decline
-              </button>
-              <button
-                onClick={confirmDemoSandbox}
-                style={{
-                  padding: '0.6rem 1.5rem',
-                  borderRadius: '0.75rem',
-                  background: 'linear-gradient(135deg, #10b981 0%, #0ea5e9 100%)',
-                  border: 'none',
-                  color: '#080a10',
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
-                }}
-              >
-                Accept &amp; Launch Sandbox
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       <UnifiedFooter 
         platformName="VaultLedger Ledger Console" 

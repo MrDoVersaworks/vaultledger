@@ -4,6 +4,7 @@ import { contactMessages } from '../db/schema.js';
 import { z } from 'zod';
 import { AppError } from '../middleware/errorHandler.js';
 import { apiRateLimiter } from '../middleware/rateLimiter.js';
+import { apiRateLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 

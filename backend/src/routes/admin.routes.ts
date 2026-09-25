@@ -128,11 +128,8 @@ router.put('/settings', async (req: Request, res: Response, next: NextFunction):
       success: true,
       data: {
         id: updated.id,
-        name: updated.name,
-        profession: updated.profession,
-        rating: updated.rating,
-        feedback: updated.feedback,
-        status: updated.status,
+        googleAnalyticsId: updated.google_analytics_id,
+        termlyUuid: updated.termly_uuid,
         createdAt: updated.created_at,
         updatedAt: updated.updated_at,
       },

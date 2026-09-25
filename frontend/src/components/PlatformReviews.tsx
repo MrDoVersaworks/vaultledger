@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { apiRequest } from '@/lib/api';
 
 export interface Review {
   id: string;
@@ -17,23 +18,16 @@ export function PlatformReviews() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  
-  const [form, setForm] = useState({
-    name: '',
-    profession: '',
-    rating: 5,
-    feedback: ''
-  });
+  const [form, setForm] = useState({ name: '', profession: '', rating: 5, feedback: '' });
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('vaultledger_app_reviews');
-      if (stored) {
-        setReviews(JSON.parse(stored));
-      }
-    } catch {
-      // Ignore storage errors
-    }
+    apiRequest<{ success: boolean; data: Review[] }>({
+      method: 'GET',
+      path: '/api/public/reviews',
+      requiresAuth: false,
+    }).then((data) => {
+      if (data.success) setReviews(data.data);
+    }).catch(() => setReviews([]));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,45 +36,29 @@ export function PlatformReviews() {
       setErrorMsg('Please complete all required fields.');
       return;
     }
-    
+
     setIsSubmitting(true);
     setErrorMsg('');
-
-    const newReview: Review = {
-      id: Date.now().toString(),
-      name: form.name.trim(),
-      profession: form.profession.trim() || 'Verified User',
-      rating: form.rating,
-      feedback: form.feedback.trim(),
-      createdAt: new Date().toLocaleDateString()
-    };
-
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
-      await fetch(`${backendUrl}/api/contact`, {
+      const data = await apiRequest<{ success: boolean; message?: string }>({
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        path: '/api/public/reviews',
+        requiresAuth: false,
+        body: {
           name: form.name.trim(),
-          email: `${form.name.trim().toLowerCase().replace(/\s+/g, '.')}@user.vaultledger`,
-          message: `[VaultLedger App Review - ${form.rating}/5 Stars] (${form.profession || 'User'}): ${form.feedback.trim()}`
-        })
+          profession: form.profession.trim() || 'User',
+          rating: form.rating,
+          feedback: form.feedback.trim(),
+        },
       });
-    } catch {
-      // Still persist locally even if backend transmission fails
+      if (!data.success) throw new Error(data.message || 'Review submission failed.');
+      setSubmitted(true);
+      setForm({ name: '', profession: '', rating: 5, feedback: '' });
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Review submission failed.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const updated = [newReview, ...reviews];
-    setReviews(updated);
-    try {
-      localStorage.setItem('vaultledger_app_reviews', JSON.stringify(updated));
-    } catch {
-      // Ignore storage errors
-    }
-
-    setSubmitted(true);
-    setIsSubmitting(false);
-    setForm({ name: '', profession: '', rating: 5, feedback: '' });
   };
 
   return (
@@ -89,133 +67,40 @@ export function PlatformReviews() {
         <h2 style={{ fontSize: '2.25rem', fontWeight: 'bold', marginBottom: '0.75rem', color: '#fff' }}>
           VaultLedger <span style={{ color: '#10b981' }}>App Experience &amp; Reviews</span>
         </h2>
-        <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>
-          Share your experience using VaultLedger for accounting, invoices, and expense classification.
-        </p>
+        <p style={{ color: '#94a3b8', fontSize: '0.95rem' }}>Share your experience using VaultLedger.</p>
       </div>
 
-      {/* Render Submitted Reviews */}
-      {reviews.length > 0 ? (
+      {reviews.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
           {reviews.map((review) => (
-            <div key={review.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '1rem', padding: '1.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                <div style={{ color: '#fbbf24', fontSize: '1rem' }}>{'★'.repeat(review.rating)}</div>
-                {review.createdAt && <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{review.createdAt}</span>}
+            <div key={review.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: '1rem', padding: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <div style={{ color: '#fbbf24' }}>{'★'.repeat(review.rating)}</div>
+                {review.createdAt && <span style={{ fontSize: '0.75rem', color: '#64748b' }}>{new Date(review.createdAt).toLocaleDateString()}</span>}
               </div>
-              <p style={{ color: '#e2e8f0', fontSize: '0.95rem', fontStyle: 'italic', marginBottom: '1rem', lineHeight: 1.5 }}>&ldquo;{review.feedback}&rdquo;</p>
+              <p style={{ color: '#e2e8f0', fontStyle: 'italic', marginBottom: '1rem', lineHeight: 1.5 }}>&ldquo;{review.feedback}&rdquo;</p>
               <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#fff' }}>{review.name} <span style={{ color: '#10b981', fontWeight: 400 }}>• {review.profession}</span></div>
             </div>
           ))}
         </div>
-      ) : (
-        <div style={{ textAlign: 'center', padding: '2rem', background: 'rgba(255,255,255,0.01)', border: '1px border-dashed rgba(255,255,255,0.08)', borderRadius: '1rem', marginBottom: '2.5rem' }}>
-          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>No user reviews submitted yet. Be the first to share your experience with VaultLedger below!</p>
-        </div>
       )}
 
-      {/* Review Submission Form */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        style={{ 
-          background: 'rgba(8, 10, 16, 0.6)', 
-          border: '1px solid rgba(16, 185, 129, 0.2)', 
-          borderRadius: '1.25rem', 
-          padding: '2rem',
-          backdropFilter: 'blur(12px)',
-          maxWidth: '650px',
-          margin: '0 auto'
-        }}
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ background: 'rgba(8, 10, 16, 0.6)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '1.25rem', padding: '2rem', maxWidth: '650px', margin: '0 auto' }}>
         {submitted ? (
           <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem auto', fontSize: '1.5rem', fontWeight: 'bold' }}>✓</div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>Review Published!</h3>
-            <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1rem' }}>Your feedback has been published and added to the VaultLedger reviews above.</p>
-            <button
-              onClick={() => setSubmitted(false)}
-              style={{ background: 'rgba(255,255,255,0.05)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontSize: '0.85rem', cursor: 'pointer' }}
-            >
-              Write Another Review
-            </button>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fff' }}>Review submitted for moderation</h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.9rem', margin: '0.5rem 0 1rem' }}>It will appear publicly after approval.</p>
+            <button onClick={() => setSubmitted(false)} style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem' }}>Write Another Review</button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#fff', textAlign: 'center' }}>
-              Submit VaultLedger Usage Review
-            </h3>
-
-            {errorMsg && (
-              <div style={{ color: '#f87171', fontSize: '0.85rem', textAlign: 'center', background: 'rgba(248, 113, 113, 0.1)', padding: '0.5rem', borderRadius: '0.5rem' }}>
-                {errorMsg}
-              </div>
-            )}
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.4rem' }}>Your Name *</label>
-                <input 
-                  type="text" 
-                  required
-                  maxLength={100}
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="e.g. Elena Vance"
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', padding: '0.6rem 0.8rem', color: '#fff', fontSize: '0.9rem', outline: 'none' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.4rem' }}>Role / Profession</label>
-                <input 
-                  type="text"
-                  maxLength={100}
-                  value={form.profession}
-                  onChange={(e) => setForm({ ...form, profession: e.target.value })}
-                  placeholder="e.g. Finance Director"
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', padding: '0.6rem 0.8rem', color: '#fff', fontSize: '0.9rem', outline: 'none' }}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.4rem' }}>App Rating</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    type="button"
-                    key={star}
-                    onClick={() => setForm({ ...form, rating: star })}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem', color: star <= form.rating ? '#fbbf24' : '#475569', padding: '0 0.2rem' }}
-                  >
-                    ★
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', color: '#94a3b8', marginBottom: '0.4rem' }}>VaultLedger App Experience *</label>
-              <textarea 
-                required
-                rows={3}
-                maxLength={1000}
-                value={form.feedback}
-                onChange={(e) => setForm({ ...form, feedback: e.target.value })}
-                placeholder="How was your experience with VaultLedger's invoicing and precision ledger?"
-                style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', padding: '0.6rem 0.8rem', color: '#fff', fontSize: '0.9rem', outline: 'none', resize: 'none' }}
-              />
-            </div>
-
-            <button 
-              type="submit" 
-              disabled={isSubmitting}
-              style={{ background: '#10b981', color: '#080a10', fontWeight: 'bold', padding: '0.75rem 1.5rem', borderRadius: '0.5rem', border: 'none', cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.7 : 1, transition: 'all 0.2s' }}
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit & Display Review'}
-            </button>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 'bold', color: '#fff', textAlign: 'center' }}>Submit VaultLedger Usage Review</h3>
+            {errorMsg && <div style={{ color: '#f87171', fontSize: '0.85rem', textAlign: 'center' }}>{errorMsg}</div>}
+            <input required maxLength={100} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Your Name" />
+            <input maxLength={100} value={form.profession} onChange={(e) => setForm({ ...form, profession: e.target.value })} placeholder="Role / Profession" />
+            <div style={{ display: 'flex', gap: '0.5rem' }}>{[1,2,3,4,5].map((star) => <button type="button" key={star} onClick={() => setForm({ ...form, rating: star })} style={{ background: 'none', border: 'none', fontSize: '1.25rem', color: star <= form.rating ? '#fbbf24' : '#475569' }}>★</button>)}</div>
+            <textarea required rows={3} maxLength={1000} value={form.feedback} onChange={(e) => setForm({ ...form, feedback: e.target.value })} placeholder="How was your experience?" />
+            <button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Submitting...' : 'Submit Review'}</button>
           </form>
         )}
       </motion.div>

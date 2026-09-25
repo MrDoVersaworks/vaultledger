@@ -184,7 +184,7 @@ export const invoiceItemSchema = z.object({
     .min(1, 'Description is required')
     .max(255, 'Description must not exceed 255 characters')
     .trim(),
-  quantity: z.coerce.number().positive('Quantity must be greater than 0').refine((value) => Number.isFinite(value) && Number(value.toFixed(2)) === value, 'Quantity must use at most 2 decimal places'),
+  quantity: z.coerce.number().positive('Quantity must be greater than 0').max(99999999.99, 'Quantity exceeds the supported maximum').refine((value) => Number.isFinite(value) && Number(value.toFixed(2)) === value, 'Quantity must use at most 2 decimal places'),
   unitPrice: z.coerce.number().nonnegative('Unit price must be 0 or greater').max(9999999999.99, 'Unit price exceeds the supported maximum').refine((value) => Number.isFinite(value) && Number(value.toFixed(2)) === value, 'Unit price must use at most 2 decimal places'),
 });
 
@@ -197,7 +197,7 @@ export const invoiceSchema = z.object({
     .trim(),
   items: z.array(invoiceItemSchema).min(1, 'Invoice must contain at least 1 item'),
   taxRate: z.coerce.number().nonnegative('Tax rate must be 0 or greater').max(999.99, 'Tax rate exceeds the supported maximum').refine((value) => Number.isFinite(value) && Number(value.toFixed(2)) === value, 'Tax rate must use at most 2 decimal places').default(0),
-  dueDate: z.union([z.string().datetime({ message: 'Invalid ISO date string for due date' }), z.string().regex(/^\\d{4}-\\d{2}-\\d{2}$/, 'Invalid calendar date')]).optional().nullable(),
+  dueDate: z.union([z.string().datetime({ message: 'Invalid ISO date string for due date' }), z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid calendar date')]).optional().nullable(),
   notes: z.string().max(2000, 'Notes must not exceed 2000 characters').trim().optional().nullable(),
 });
 

@@ -93,6 +93,14 @@ jobs:
           NODE_ENV: test
           CORS_ORIGIN: http://localhost:3002
         run: npm run db:migrate
+      - name: Seed E2E administrator
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vaultledger_test
+          E2E_ADMIN_EMAIL: admin.e2e@vaultledger.test
+          E2E_ADMIN_PASSWORD: VaultLedger-E2E-Password-2026!
+        run: |
+          node --input-type=module -e "import bcrypt from 'bcryptjs'; import pg from 'pg'; const pool = new pg.Pool({connectionString: process.env.DATABASE_URL}); const hash = await bcrypt.hash(process.env.E2E_ADMIN_PASSWORD, 4); await pool.query('INSERT INTO users (email, password_hash, name, role) VALUES ($1, $2, $3, $4) ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = EXCLUDED.role', [process.env.E2E_ADMIN_EMAIL, hash, 'E2E Administrator', 'admin']); await pool.end();"
       - name: Install Playwright browser
         working-directory: ./frontend
         run: npx playwright install --with-deps chromium
@@ -106,6 +114,8 @@ jobs:
           NODE_ENV: test
           CORS_ORIGIN: http://localhost:3002
           NEXT_PUBLIC_API_URL: http://localhost:5002
+          E2E_ADMIN_EMAIL: admin.e2e@vaultledger.test
+          E2E_ADMIN_PASSWORD: VaultLedger-E2E-Password-2026!
         run: npx playwright test
 
 

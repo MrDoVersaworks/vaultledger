@@ -36,6 +36,13 @@
       "when": 1790294402000,
       "tag": "0005_persistent_security_state",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1790294403000,
+      "tag": "0006_invoice_number_unique",
+      "breakpoints": true
     }
   ]
 }
